@@ -47,8 +47,10 @@ green #72C95A.*
 
 ## Tier 1: backgrounds (biggest visual win, 5–14× too small today)
 
-Still needed: `bg/splash`, `bg/menu`, `bg/loading`, `bg/garage`, `event/banner`, and optionally
-`bg/night-ground`. The world layer prompts below are kept for reference.
+Still needed: `bg/garage`, `event/banner`, and optionally `bg/night-ground`.
+`bg/splash`, `bg/menu` and `bg/loading` are now composed in HD from the park layers with
+`tools/art/compose_backdrop.py`. Dedicated art can still replace them later (same file names).
+The world layer prompts below are kept for reference.
 
 Parallax layers (`-far`, `-mid`, `-near`) are **3840×1080, transparent above the scenery, and tile
 seamlessly left to right**. The sky (`-sky`) is **1920×1080, fully painted**. Scenery sits in the
@@ -126,10 +128,7 @@ frames are code) · `event/reward` 512×512 neon cart on a pedestal.
 
 | File | Now | Target | Short by | Use |
 | --- | --- | --- | --- | --- |
-| `bg/menu.webp` | 520×218 | 1920×1080 | 5.0× | full-screen backdrop |
-| `bg/loading.webp` | 476×218 | 1920×1080 | 5.0× | full-screen backdrop |
 | `bg/garage.webp` | 501×218 | 1920×1080 | 5.0× | full-screen backdrop |
-| `bg/splash.webp` | 666×238 | 1920×1080 | 4.5× | full-screen backdrop |
 | `ui/logo.webp` | 507×233 | 2048×1024 | 4.4× | logo |
 | `riders/dave-calm.webp` | 117×147 | 512×512 | 4.4× | seated rider |
 | `riders/dave-excited.webp` | 123×148 | 512×512 | 4.2× | seated rider |
@@ -179,6 +178,7 @@ frames are code) · `event/reward` 512×512 neon cart on a pedestal.
 | `bg/volcano-mid.webp` | 2880×810 | 2880×810 | 1.0× | parallax layer, tiles horizontally |
 | `bg/volcano-ground.webp` | 2880×810 | 2880×810 | 1.0× | parallax layer, tiles horizontally |
 | `bg/volcano-far.webp` | 2880×810 | 2880×810 | 1.0× | parallax layer, tiles horizontally |
+| `bg/splash.webp` | 1920×1080 | 1920×1080 | 1.0× | full-screen backdrop |
 | `bg/snow-sky.webp` | 1920×1080 | 1920×1080 | 1.0× | full-screen sky |
 | `bg/snow-near.webp` | 2880×810 | 2880×810 | 1.0× | parallax layer, tiles horizontally |
 | `bg/snow-mid.webp` | 2880×810 | 2880×810 | 1.0× | parallax layer, tiles horizontally |
@@ -198,6 +198,8 @@ frames are code) · `event/reward` 512×512 neon cart on a pedestal.
 | `bg/mountain-mid.webp` | 2880×810 | 2880×810 | 1.0× | parallax layer, tiles horizontally |
 | `bg/mountain-ground.webp` | 2880×810 | 2880×810 | 1.0× | parallax layer, tiles horizontally |
 | `bg/mountain-far.webp` | 2880×810 | 2880×810 | 1.0× | parallax layer, tiles horizontally |
+| `bg/menu.webp` | 1920×1080 | 1920×1080 | 1.0× | full-screen backdrop |
+| `bg/loading.webp` | 1920×1080 | 1920×1080 | 1.0× | full-screen backdrop |
 | `bg/desert-sky.webp` | 1920×1080 | 1920×1080 | 1.0× | full-screen sky |
 | `bg/desert-near.webp` | 2880×810 | 2880×810 | 1.0× | parallax layer, tiles horizontally |
 | `bg/desert-mid.webp` | 2880×810 | 2880×810 | 1.0× | parallax layer, tiles horizontally |

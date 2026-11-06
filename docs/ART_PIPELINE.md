@@ -20,6 +20,15 @@ python tools/art/cutout.py <raw_dir> <out_dir>                         # green s
 python tools/art/slice_sheet.py boxes <sheet.png> <boxes.txt> <out_dir> # slice a composite sheet by named boxes
 ```
 
+## Composing screen backdrops from world layers
+
+```bash
+python tools/art/compose_backdrop.py <layers_dir> park public/assets/bg/menu.webp --x 0.66 --mood dusk
+```
+
+`--x` slides the frame along the layers, `--mood` is `day`, `dusk` or `silhouette` (loading screen).
+Today's splash, menu and loading backdrops were made this way from the park layers.
+
 ## Dropping art in
 
 Put the original in `art/hd/` under the same path and run `python tools/art/ingest.py` (see
