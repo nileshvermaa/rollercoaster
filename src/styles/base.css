@@ -1,0 +1,111 @@
+:root {
+  --midnight: #22213d;
+  --panel: #25283d;
+  --panel-2: #2e3150;
+  --panel-3: #1b1d30;
+  --edge: #4a4f80;
+  --ink: #1a1a2e;
+  --gold: #ffb62e;
+  --gold-hi: #ffe68a;
+  --coral: #e95757;
+  --blue: #42a5ef;
+  --green: #72c95a;
+  --purple: #6e63b7;
+  --pink: #f4a6d7;
+  --text: #f5f1ff;
+  --muted: #b9b3da;
+  --outline: 0 2px 0 var(--ink), 1px 0 0 var(--ink), -1px 0 0 var(--ink), 0 -1px 0 var(--ink);
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  background: var(--midnight);
+  color: var(--text);
+  font-family: 'Nunito', system-ui, sans-serif;
+  font-weight: 800;
+  overflow: hidden;
+  overscroll-behavior: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: none;
+}
+
+#app { position: fixed; inset: 0; }
+
+#world { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+
+h2 { margin: 0; font-family: 'Lilita One', sans-serif; font-weight: 400; font-size: 28px; text-shadow: 0 3px 0 var(--ink); }
+
+.hidden { display: none !important; }
+
+.hint { margin: 0; font-size: 13px; color: var(--muted); }
+
+button { font: inherit; color: inherit; cursor: pointer; }
+button:focus-visible, input:focus-visible { outline: 3px solid var(--gold-hi); outline-offset: 2px; }
+
+.btn {
+  min-height: 48px;
+  padding: 0 22px;
+  border: 3px solid var(--ink);
+  border-radius: 14px;
+  font-family: 'Lilita One', sans-serif;
+  font-size: 21px;
+  letter-spacing: 0.5px;
+  color: #fff;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.35);
+  box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.5), inset 0 -5px 0 rgba(0, 0, 0, 0.22), 0 4px 0 var(--ink);
+  transition: transform 0.06s;
+}
+.btn:active { transform: translateY(3px); box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.5), inset 0 -3px 0 rgba(0, 0, 0, 0.22), 0 1px 0 var(--ink); }
+.btn:disabled { filter: grayscale(0.8) brightness(0.7); cursor: not-allowed; }
+.btn-big { min-height: 62px; font-size: 32px; }
+.btn-small { min-height: 40px; font-size: 16px; }
+.btn-yellow { background: linear-gradient(180deg, #ffe68a, #ffb62e 55%, #f09000); color: #3a1e00; text-shadow: none; }
+.btn-blue { background: linear-gradient(180deg, #8ed0ff, #42a5ef 55%, #1f76d2); }
+.btn-purple { background: linear-gradient(180deg, #a69cf0, #6e63b7 55%, #4d4392); }
+.btn-green { background: linear-gradient(180deg, #b6f59a, #72c95a 55%, #3e9a30); }
+.btn-red { background: linear-gradient(180deg, #ff8a80, #e95757 55%, #b3202a); }
+.btn-slate { background: linear-gradient(180deg, #5a5f90, #3a3d63); }
+
+.icon-btn {
+  width: 46px; height: 46px;
+  border: 3px solid var(--ink);
+  border-radius: 12px;
+  background: linear-gradient(180deg, #4a4f80, #2a2d4e);
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.25);
+  font-family: 'Lilita One', sans-serif;
+  font-size: 24px;
+  line-height: 1;
+}
+
+.chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  height: 32px; padding: 0 12px 0 6px;
+  border-radius: 999px;
+  background: rgba(34, 33, 61, 0.78);
+  font-family: 'Lilita One', sans-serif; font-size: 18px;
+  text-shadow: var(--outline);
+}
+
+.coin {
+  display: inline-block; width: 22px; height: 22px; border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #fff3a6, #ffc928 45%, #d98a00);
+  border: 2px solid #5a3200;
+}
+
+.panel {
+  background: linear-gradient(180deg, var(--panel-2), var(--panel-3));
+  border: 3px solid var(--edge);
+  border-radius: 20px;
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.12), 0 0 0 3px var(--ink), 0 14px 30px rgba(0, 0, 0, 0.5);
+  padding: 16px 20px;
+}
+
+.toggle { appearance: none; width: 56px; height: 30px; border-radius: 999px; border: 2px solid var(--ink); background: #3a3d55; position: relative; cursor: pointer; flex: none; }
+.toggle::after { content: ''; position: absolute; top: 2px; left: 2px; width: 22px; height: 22px; border-radius: 50%; background: linear-gradient(180deg, #9aa1ae, #6e7280); transition: left 0.15s; }
+.toggle:checked { background: linear-gradient(180deg, var(--gold-hi), var(--gold)); }
+.toggle:checked::after { left: 28px; background: linear-gradient(180deg, #fff, #d8dce6); }

@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="theme-color" content="#22213D" />
+    <meta name="description" content="Off The Rails — an endless physics roller coaster. Tilt to throttle, brake before the crest, don't derail." />
+    <title>Off The Rails</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='14' fill='%2322213D'/><path d='M6 44 C20 44 26 18 40 18 S56 34 60 34' stroke='%23E8253A' stroke-width='7' fill='none'/><circle cx='40' cy='14' r='6' fill='%23FFB62E'/></svg>" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/src/styles/index.css" />
+  </head>
+  <body>
+    <div id="app">
+      <canvas id="world" aria-label="Roller coaster track"></canvas>
+
+      <div id="loading" class="screen show"><div class="loading-text">Loading…</div></div>
+
+      <section id="title" class="screen" aria-label="Title">
+        <img class="title-bg" src="/assets/bg/splash.webp" alt="" />
+        <img class="logo" src="/assets/ui/logo.webp" alt="Off The Rails" />
+        <button class="tap-start" id="tap-start">TAP TO START</button>
+        <div class="fineprint">MegaCorp Fun Holdings™ accepts no liability</div>
+      </section>
+
+      <section id="menu" class="screen" aria-label="Main menu">
+        <div class="topbar">
+          <div class="chip"><i class="coin"></i><span id="menu-coins">0</span></div>
+          <div class="chip">BEST <span id="menu-best">0 m</span></div>
+        </div>
+        <img class="logo small" src="/assets/ui/logo.webp" alt="Off The Rails" />
+        <div class="menu-buttons">
+          <button class="btn btn-yellow btn-big" id="btn-play">PLAY ▸</button>
+          <button class="btn btn-blue" id="btn-garage">GARAGE</button>
+          <button class="btn btn-purple" id="btn-settings">SETTINGS</button>
+        </div>
+      </section>
+
+      <section id="garage" class="screen" aria-label="Garage">
+        <div class="topbar">
+          <button class="icon-btn" id="garage-back" aria-label="Back">‹</button>
+          <h2>Garage</h2>
+          <div class="chip"><i class="coin"></i><span id="garage-coins">0</span></div>
+        </div>
+        <div class="garage-body">
+          <div class="cart-list" id="cart-list"></div>
+          <div class="panel upgrades" id="upgrades"></div>
+        </div>
+      </section>
+
+      <section id="settings" class="screen" aria-label="Settings">
+        <div class="panel settings-panel">
+          <div class="panel-head">
+            <button class="icon-btn" id="settings-back" aria-label="Back">‹</button>
+            <h2>Settings</h2>
+          </div>
+          <label class="row">Tilt controls<input type="checkbox" id="set-tilt" class="toggle" /></label>
+          <p class="hint">Tilt right for gas, left for brake. Your phone's angle when a run starts counts as neutral. Touch pedals and keyboard (→/D gas, ←/A brake) always work.</p>
+          <button class="btn btn-red btn-small" id="set-reset">Reset progress</button>
+        </div>
+      </section>
+
+      <div id="hud" class="hidden">
+        <div class="hud-top">
+          <div class="chip"><i class="coin"></i><span id="hud-coins">0</span></div>
+          <div class="dist">
+            <div class="dist-bar"><i id="dist-fill"></i><b id="dist-crown" aria-hidden="true"></b></div>
+            <div class="dist-row"><span id="hud-dist">0 m</span><span id="hud-best">BEST 0 m</span></div>
+          </div>
+          <button class="icon-btn pause" id="btn-pause" aria-label="Pause">II</button>
+        </div>
+        <div class="fuel" aria-label="Fuel">
+          <img src="/assets/ui/fuel.webp" alt="" />
+          <div class="fuel-bar"><i id="fuel-fill"></i></div>
+        </div>
+        <div class="gauges" aria-hidden="true">
+          <div class="gauge"><svg viewBox="0 0 100 60"><path d="M10 55 A40 40 0 0 1 90 55" class="g-track"/><path d="M70 21 A40 40 0 0 1 90 55" class="g-red"/><line x1="50" y1="55" x2="50" y2="20" class="needle" id="needle-speed"/><circle cx="50" cy="55" r="6" class="hub"/></svg><span>SPEED</span></div>
+          <div class="gauge"><svg viewBox="0 0 100 60"><path d="M10 55 A40 40 0 0 1 50 15" class="g-green"/><path d="M50 15 A40 40 0 0 1 78 27" class="g-yellow"/><path d="M78 27 A40 40 0 0 1 90 55" class="g-red"/><line x1="50" y1="55" x2="50" y2="20" class="needle" id="needle-danger"/><circle cx="50" cy="55" r="6" class="hub"/></svg><span>DERAIL</span></div>
+        </div>
+        <div class="karen hidden" id="karen"><img src="/assets/ui/karen.webp" alt="" /><span id="karen-text"></span></div>
+        <button class="pedal brake" id="pedal-brake" aria-label="Brake"><i></i><i></i><i></i><i></i><i></i><i></i><b>BRAKE</b></button>
+        <button class="pedal gas" id="pedal-gas" aria-label="Gas"><i></i><i></i><i></i><i></i><i></i><i></i><b>GAS</b></button>
+      </div>
+
+      <section id="pause" class="screen overlay" aria-label="Paused">
+        <div class="panel pause-panel">
+          <h2>Paused</h2>
+          <button class="btn btn-green" id="btn-resume">▶ Resume</button>
+          <button class="btn btn-slate" id="btn-restart">Restart ↻</button>
+          <button class="btn btn-slate" id="btn-quit">Main menu</button>
+          <p class="hint">Karen-9000 is filing an incident report.</p>
+        </div>
+      </section>
+
+      <section id="results" class="screen overlay" aria-label="Run over">
+        <div class="panel results-panel">
+          <div class="ribbon"><img src="/assets/ui/ribbon.webp" alt="" /><span id="res-title">DERAILED!</span></div>
+          <p class="epitaph" id="res-epitaph"></p>
+          <div class="stats">
+            <div><span>Distance</span><b id="res-dist">0 m</b></div>
+            <div><span>Coins</span><b id="res-coins">+0</b></div>
+            <div><span>Best</span><b id="res-best">0 m</b></div>
+          </div>
+          <div class="row-buttons">
+            <button class="btn btn-blue" id="btn-retry">Retry ↻</button>
+            <button class="btn btn-green" id="btn-res-garage">Garage</button>
+          </div>
+        </div>
+      </section>
+
+      <div id="rotate" class="screen overlay" aria-live="polite">
+        <div class="panel"><h2>Turn your phone sideways</h2><p class="hint">The Engagement Loop™ is a landscape experience.</p></div>
+      </div>
+    </div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

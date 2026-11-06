@@ -1,0 +1,108 @@
+name: CI
+
+# Lints, tests and builds every push and pull request, then deploys to Vercel:
+# pull requests get a preview URL, pushes to main go to production.
+# Deploys need three repository secrets (Settings → Secrets and variables → Actions):
+#   VERCEL_TOKEN, VERCEL_ORG_ID, VERCEL_PROJECT_ID   — see README "Deploy".
+# Without them the deploy job is skipped and CI still passes.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  check:
+    name: Lint & test
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm test
+
+  build:
+    name: Build (Node ${{ matrix.node-version }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      matrix:
+        node-version: [20, 22]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+
+  deploy:
+    name: Deploy to Vercel
+    needs: [check, build]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+      TARGET: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && 'production' || 'preview' }}
+    steps:
+      - name: Check Vercel secrets
+        id: secrets
+        run: |
+          if [ -z "$VERCEL_TOKEN" ] || [ -z "$VERCEL_ORG_ID" ] || [ -z "$VERCEL_PROJECT_ID" ]; then
+            echo "Vercel secrets not set; skipping deploy." >> "$GITHUB_STEP_SUMMARY"
+            echo "ok=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ok=true" >> "$GITHUB_OUTPUT"
+          fi
+      - uses: actions/checkout@v4
+        if: steps.secrets.outputs.ok == 'true'
+      - uses: actions/setup-node@v4
+        if: steps.secrets.outputs.ok == 'true'
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install Vercel CLI
+        if: steps.secrets.outputs.ok == 'true'
+        run: npm install --global vercel@latest
+      - name: Pull Vercel project settings
+        if: steps.secrets.outputs.ok == 'true'
+        run: vercel pull --yes --environment="$TARGET" --token="$VERCEL_TOKEN"
+      - name: Build
+        if: steps.secrets.outputs.ok == 'true'
+        run: vercel build $([ "$TARGET" = production ] && echo --prod) --token="$VERCEL_TOKEN"
+      - name: Deploy
+        id: deploy
+        if: steps.secrets.outputs.ok == 'true'
+        run: |
+          url=$(vercel deploy --prebuilt $([ "$TARGET" = production ] && echo --prod) --token="$VERCEL_TOKEN")
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+          echo "Deployed ($TARGET): $url" >> "$GITHUB_STEP_SUMMARY"
+      - name: Comment preview URL on the pull request
+        if: steps.secrets.outputs.ok == 'true' && github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: `Preview: ${{ steps.deploy.outputs.url }}`,
+            });
