@@ -4,6 +4,11 @@ Off The Rails is a static single-page game: Vite bundles plain ES modules, the w
 one `<canvas>` with the 2D API, and the HUD and screens are plain DOM. No framework, no backend;
 progress lives in `localStorage`.
 
+**Screens use a fixed 844×390 design frame** (`.stage`), the same size as the design board
+artboards, scaled with `--s` to fit the viewport (letterboxed by each screen's own backdrop). That is
+what keeps every screen aligned like the board on phones and desktops: lay out with absolute
+positions in that frame.
+
 ## Folder map
 
 ```
@@ -11,17 +16,28 @@ src/
   main.js              boot; exposes window.__game in development
   game/
     Game.js            the hub: save, input, renderer, current run, frame loop, screen state machine
-    physics.js         PURE cart physics: on-rail bead model, launch, flight, landing, derail
+    physics.js         PURE cart physics: on-rail bead model, launch, flight, landing, derail, shield rescue
     save.js            PURE save parsing/validation + localStorage read/write
-    dom.js             $(), number formatting, screen toggling
+    progress.js        PURE progression: stars, levels, daily rewards, missions, event, shop, leaderboard
+    dom.js             $(), h() element builder, toast
     systems/
-      run.js           one run: fixed-step physics, pickups, events → particles and Karen, end of run
-      render.js        canvas: parallax park, terrain, supports, lit rail, pickups, particles, cart
-      hud.js           DOM HUD: distance/progress, coins, fuel, speed and derail gauges
-      screens.js       title, menu, garage (buy/select/upgrade), settings, pause, results
+      run.js           one run: world, fixed-step physics, pickups, power-ups, events, end of run
+      render.js        canvas: world parallax, terrain, supports, lit rail, pickups, the 3-car train
+      hud.js           DOM HUD: distance/progress, coins/gems, speed/fuel/derail gauges, power-ups
+    screens/
+      menus.js         main menu, home hub, level select
+      garage.js        garage (stats, upgrades, carousel) and customize
+      store.js         shop, events, daily rewards
+      social.js        missions, leaderboard, profile, settings
+      results.js       run complete
   content/
     tuning.js          every physics and run number
     carts.js           the six carts, stats, upgrades and their prices
+    worlds.js          the six worlds: art, colours, physics quirks, unlock distance
+    cosmetics.js       paints, trails, wheel skins
+    shop.js            gem shop items
+    missions.js        daily/weekly pools and achievements
+    rewards.js         daily calendar, the event, leaderboard rivals, loading tips
     story.js           Karen-9000's lines and the end-of-run epitaphs
   world/
     track.js           PURE procedural track: rail spline, gaps, boosters, coins, fuel cans
@@ -48,6 +64,9 @@ the run → `Renderer.follow` moves the camera → `updateHud` → `Renderer.dra
 - **In the air** it is a projectile. It weathervanes toward its flight path; gas/brake tip the nose.
 - **Landing**: angle mismatch above the cart's `grip` → derail; speed into the rail above
   `PHYS.hardLanding` → derail; otherwise the velocity is projected back onto the rail.
+- **The train** is drawn by `Renderer.carPoses`: trailing cars follow the rail at a fixed arc distance
+  behind the lead car (rigidly while airborne). Each car sits on small road wheels on the steel top
+  rail with brackets hooking under it to upstop wheels; riders are drawn in the seats behind the body.
 - `liftRatio()` looks ahead along the rail and reports how close the next crest is to launching the
   cart at the current speed. That drives the DERAIL gauge and Karen's warnings.
 

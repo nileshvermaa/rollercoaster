@@ -16,102 +16,310 @@
     <div id="app">
       <canvas id="world" aria-label="Roller coaster track"></canvas>
 
-      <div id="loading" class="screen show"><div class="loading-text">Loading…</div></div>
+      <!-- 03 Loading -->
+      <section id="loading" class="screen show" aria-label="Loading">
+        <img class="bg" src="/assets/bg/loading.webp" alt="" />
+        <div class="stage">
+          <div class="loading-box">
+            <div class="h-xl outline">Loading…</div>
+            <div class="bar big"><i id="load-fill"></i></div>
+            <div class="load-pct" id="load-pct">0%</div>
+            <div class="tip" id="load-tip"></div>
+          </div>
+        </div>
+      </section>
 
+      <!-- 01 Splash -->
       <section id="title" class="screen" aria-label="Title">
-        <img class="title-bg" src="/assets/bg/splash.webp" alt="" />
-        <img class="logo" src="/assets/ui/logo.webp" alt="Off The Rails" />
-        <button class="tap-start" id="tap-start">TAP TO START</button>
-        <div class="fineprint">MegaCorp Fun Holdings™ accepts no liability</div>
+        <img class="bg" src="/assets/bg/splash.webp" alt="Sunset carnival with castle, ferris wheel and a lit coaster track" />
+        <div class="bg-fade-bottom"></div>
+        <div class="stage">
+          <img class="splash-logo" src="/assets/ui/logo.webp" alt="RollerCoaster Racing 2D" />
+          <button class="tap-start" id="tap-start">TAP TO START</button>
+          <div class="fineprint">v0.2 · MegaCorp Fun Holdings™ accepts no liability</div>
+        </div>
       </section>
 
+      <!-- 02 Main menu -->
       <section id="menu" class="screen" aria-label="Main menu">
-        <div class="topbar">
-          <div class="chip"><i class="coin"></i><span id="menu-coins">0</span></div>
-          <div class="chip">BEST <span id="menu-best">0 m</span></div>
-        </div>
-        <img class="logo small" src="/assets/ui/logo.webp" alt="Off The Rails" />
-        <div class="menu-buttons">
-          <button class="btn btn-yellow btn-big" id="btn-play">PLAY ▸</button>
-          <button class="btn btn-blue" id="btn-garage">GARAGE</button>
-          <button class="btn btn-purple" id="btn-settings">SETTINGS</button>
+        <img class="bg" src="/assets/bg/menu.webp" alt="" />
+        <div class="bg-dim radial"></div>
+        <div class="stage">
+          <img class="menu-logo" src="/assets/ui/logo.webp" alt="RollerCoaster Racing 2D" />
+          <div class="menu-side">
+            <button class="side-btn" data-go="profile"><img src="/assets/avatars/dave.webp" alt="" />Profile</button>
+            <button class="side-btn" data-go="missions"><img src="/assets/missions/distance.webp" alt="" />Missions<b class="badge hidden" id="badge-missions"></b></button>
+            <button class="side-btn" data-go="rewards"><img src="/assets/rewards/gift-box.webp" alt="" />Rewards<b class="badge hidden" id="badge-rewards">!</b></button>
+            <button class="side-btn" data-go="leaderboard"><img src="/assets/ui/trophy.webp" alt="" />Ranks</button>
+          </div>
+          <div class="menu-main">
+            <button class="btn btn-yellow btn-xl" data-go="hub">PLAY ▸</button>
+            <button class="btn btn-blue btn-l" data-go="garage">GARAGE</button>
+            <button class="btn btn-purple btn-l" data-go="shop">SHOP</button>
+            <button class="btn btn-purple btn-l" data-go="events">EVENTS</button>
+          </div>
+          <div class="chips tr"><span class="chip"><i class="coin"></i><b data-bind="coins">0</b></span><span class="chip"><img src="/assets/ui/gem.webp" alt="" /><b data-bind="gems">0</b></span></div>
+          <button class="icon-btn gear" data-go="settings" aria-label="Settings">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="3.5"></circle><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"></path></svg>
+          </button>
         </div>
       </section>
 
+      <!-- 04 Home hub -->
+      <section id="hub" class="screen plain" aria-label="Home hub">
+        <img class="bg faint" src="/assets/bg/menu.webp" alt="" />
+        <div class="stage">
+          <div class="hub-bar">
+            <button class="back-btn" data-go="back" aria-label="Back">‹</button>
+            <div class="avatar-sm"><img src="/assets/avatars/dave.webp" alt="" /><img class="frame" data-bind="frame" src="/assets/avatars/frame-bronze.webp" alt="" /></div>
+            <div class="who"><div><b data-bind="name">Dave_34</b> <span class="lvl">Lv <span data-bind="level">1</span></span></div><div class="bar xp"><i data-bind="xp"></i></div></div>
+            <span class="grow"></span>
+            <span class="chip"><i class="coin"></i><b data-bind="coins">0</b><button class="plus" data-go="shop" aria-label="Get coins">+</button></span>
+            <span class="chip"><img src="/assets/ui/gem.webp" alt="" /><b data-bind="gems">0</b><button class="plus" data-go="rewards" aria-label="Get gems">+</button></span>
+          </div>
+          <div class="hub-cards">
+            <button class="hub-card selected" data-go="levels"><img src="/assets/hub/adventure.webp" alt="" /><span><b>Adventure</b><small>Levels</small></span></button>
+            <button class="hub-card" data-go="events"><img src="/assets/hub/events.webp" alt="" /><i class="notif">1</i><span><b>Events</b><small>Limited time</small></span></button>
+            <button class="hub-card" id="hub-multi"><img src="/assets/hub/multiplayer.webp" alt="" /><span><b>Multiplayer</b><small>Coming soon</small></span></button>
+            <button class="hub-card" id="hub-challenge"><img src="/assets/hub/challenge.webp" alt="" /><span><b>Challenge</b><small id="challenge-sub">Daily run</small></span></button>
+          </div>
+          <div class="dots"><i class="on"></i><i></i><i></i></div>
+        </div>
+      </section>
+
+      <!-- 05 Level select -->
+      <section id="levels" class="screen plain" aria-label="Level select">
+        <div class="stage">
+          <div class="head"><button class="back-btn" data-go="back" aria-label="Back">‹</button><h2>Adventure Mode</h2><span class="w44"></span></div>
+          <div class="level-list" id="level-list"></div>
+          <div class="dots"><i class="on"></i><i></i><i></i></div>
+        </div>
+      </section>
+
+      <!-- 09 Garage -->
       <section id="garage" class="screen" aria-label="Garage">
-        <div class="topbar">
-          <button class="icon-btn" id="garage-back" aria-label="Back">‹</button>
-          <h2>Garage</h2>
-          <div class="chip"><i class="coin"></i><span id="garage-coins">0</span></div>
-        </div>
-        <div class="garage-body">
-          <div class="cart-list" id="cart-list"></div>
-          <div class="panel upgrades" id="upgrades"></div>
+        <img class="bg" src="/assets/bg/garage.webp" alt="" />
+        <div class="bg-dim right"></div>
+        <div class="stage">
+          <div class="head left"><button class="back-btn" data-go="back" aria-label="Back">‹</button><h2>Garage</h2><span class="grow"></span><span class="chip"><i class="coin"></i><b data-bind="coins">0</b></span></div>
+          <img class="plinth" src="/assets/ui/plinth.webp" alt="" />
+          <img class="garage-cart" id="garage-cart" src="/assets/carts/basic.webp" alt="" />
+          <div class="garage-name"><div class="h-l outline" id="garage-name"></div><span class="rarity" id="garage-rarity"></span></div>
+          <div class="garage-panel" id="garage-panel"></div>
+          <div class="carousel" id="garage-carousel"></div>
         </div>
       </section>
 
+      <!-- 10 Customize -->
+      <section id="customize" class="screen plain" aria-label="Customize">
+        <div class="stage">
+          <div class="head left"><button class="back-btn" data-go="back" aria-label="Back">‹</button><h2>Customize</h2><span class="grow"></span><span class="chip"><i class="coin"></i><b data-bind="coins">0</b></span></div>
+          <div class="cz-preview">
+            <img class="cz-plinth" src="/assets/ui/plinth.webp" alt="" />
+            <img class="cz-trail" id="cz-trail" alt="" />
+            <img class="cz-cart" id="cz-cart" alt="Cart preview" />
+          </div>
+          <div class="cz-actions">
+            <button class="btn btn-slate" id="cz-reset">Reset</button>
+            <button class="btn btn-yellow" id="cz-apply">Apply</button>
+          </div>
+          <div class="cz-panel">
+            <div class="cz-label">Paint</div><div class="cz-row" id="cz-paint"></div>
+            <div class="cz-label">Trail</div><div class="cz-row" id="cz-trails"></div>
+            <div class="cz-label">Wheels</div><div class="cz-row" id="cz-wheels"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 11 Shop -->
+      <section id="shop" class="screen plain" aria-label="Shop">
+        <div class="stage">
+          <div class="head left"><button class="back-btn" data-go="back" aria-label="Back">‹</button><div class="tabs" id="shop-tabs"></div><span class="grow"></span><span class="chip"><img src="/assets/ui/gem.webp" alt="" /><b data-bind="gems">0</b></span></div>
+          <div class="shop-grid" id="shop-grid"></div>
+        </div>
+      </section>
+
+      <!-- 12 Events -->
+      <section id="events" class="screen" aria-label="Events">
+        <img class="bg pos-72" src="/assets/event/banner.webp" alt="Night carnival with neon ferris wheel and a golden cart" />
+        <div class="bg-dim left-heavy"></div>
+        <div class="stage">
+          <button class="back-btn abs-back" data-go="back" aria-label="Back">‹</button>
+          <div class="event-col">
+            <span class="pill red">LIMITED EVENT</span>
+            <div class="h-xxl outline glow">Night Carnival</div>
+            <p class="event-blurb" id="event-blurb"></p>
+            <div class="event-timer"><img src="/assets/event/timer.webp" alt="" /><span id="event-ends"></span></div>
+            <div class="event-reward">
+              <img src="/assets/event/reward.webp" alt="Exclusive neon cart skin" />
+              <div><small>EXCLUSIVE REWARD</small><b id="event-reward-name"></b><span id="event-progress"></span></div>
+            </div>
+            <button class="btn btn-yellow btn-l" id="event-play">Play Now ▸</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- 13 Daily rewards -->
+      <section id="rewards" class="screen plain" aria-label="Daily rewards">
+        <div class="stage">
+          <button class="back-btn abs-back" data-go="back" aria-label="Back">‹</button>
+          <h2 class="center-title">Daily Rewards</h2>
+          <p class="subtitle">Come back every day. Karen-9000 is counting.</p>
+          <div class="reward-days" id="reward-days"></div>
+          <button class="btn btn-green btn-xl claim" id="reward-claim">Claim</button>
+        </div>
+      </section>
+
+      <!-- 14 Missions -->
+      <section id="missions" class="screen plain" aria-label="Missions">
+        <div class="stage">
+          <div class="head left"><button class="back-btn" data-go="back" aria-label="Back">‹</button><h2>Missions</h2><span class="grow"></span><div class="tabs" id="mission-tabs"></div></div>
+          <div class="mission-list" id="mission-list"></div>
+        </div>
+      </section>
+
+      <!-- 15 Leaderboard -->
+      <section id="leaderboard" class="screen plain" aria-label="Leaderboard">
+        <div class="stage">
+          <div class="head left"><button class="back-btn" data-go="back" aria-label="Back">‹</button><h2>Leaderboard</h2></div>
+          <div class="lb-side"><div class="tabs vertical" id="lb-tabs"></div><img src="/assets/ui/trophy.webp" alt="" /><small>Offline rivals for now</small></div>
+          <div class="lb-rows" id="lb-rows"></div>
+        </div>
+      </section>
+
+      <!-- 16 Profile -->
+      <section id="profile" class="screen plain" aria-label="Profile">
+        <div class="stage">
+          <div class="head left"><button class="back-btn" data-go="back" aria-label="Back">‹</button><h2>Profile</h2></div>
+          <div class="profile-top">
+            <div class="avatar-lg"><img src="/assets/avatars/dave.webp" alt="Dave avatar" /><img class="frame" data-bind="frame" src="/assets/avatars/frame-bronze.webp" alt="" /></div>
+            <div class="profile-info">
+              <label class="name-edit"><input id="profile-name" maxlength="16" aria-label="Display name" /><span aria-hidden="true">✎</span></label>
+              <p class="quote">"Just wanted one ride before my cousin's wedding."</p>
+              <div class="lvl-row"><span class="lvl">Lv <span data-bind="level">1</span></span><div class="bar xp wide"><i data-bind="xp"></i></div><small data-bind="xpText"></small></div>
+            </div>
+          </div>
+          <div class="stat-cards" id="profile-stats"></div>
+        </div>
+      </section>
+
+      <!-- 17 Settings -->
       <section id="settings" class="screen" aria-label="Settings">
-        <div class="panel settings-panel">
-          <div class="panel-head">
-            <button class="icon-btn" id="settings-back" aria-label="Back">‹</button>
-            <h2>Settings</h2>
+        <img class="bg faint" src="/assets/bg/menu.webp" alt="" />
+        <div class="stage">
+          <div class="panel settings-panel">
+            <div class="head-in"><button class="back-btn small" data-go="back" aria-label="Back">‹</button><h2>Settings</h2></div>
+            <label class="set-row"><i>♪</i><span>Music</span><input type="checkbox" class="toggle" data-setting="music" /></label>
+            <label class="set-row"><i>FX</i><span>Sound Effects</span><input type="checkbox" class="toggle" data-setting="sfx" /></label>
+            <label class="set-row"><i>≋</i><span>Vibration</span><input type="checkbox" class="toggle" data-setting="vibration" /></label>
+            <label class="set-row"><i>↻</i><span>Tilt Controls</span><input type="checkbox" class="toggle" data-setting="tilt" /></label>
+            <div class="set-row"><i>G</i><span>Graphics</span><button class="chev" id="gfx-prev" aria-label="Previous graphics option">‹</button><b class="pick" id="gfx-value">High</b><button class="chev" id="gfx-next" aria-label="Next graphics option">›</button></div>
+            <div class="set-row"><i>A</i><span>Language</span><button class="chev" disabled aria-label="Previous language">‹</button><b class="pick">English</b><button class="chev" disabled aria-label="Next language">›</button></div>
+            <div class="set-links"><a href="#" id="link-privacy">Privacy</a><a href="#" id="link-terms">Terms</a><button class="link" id="set-reset">Reset progress</button><span>v0.2</span></div>
           </div>
-          <label class="row">Tilt controls<input type="checkbox" id="set-tilt" class="toggle" /></label>
-          <p class="hint">Tilt right for gas, left for brake. Your phone's angle when a run starts counts as neutral. Touch pedals and keyboard (→/D gas, ←/A brake) always work.</p>
-          <button class="btn btn-red btn-small" id="set-reset">Reset progress</button>
         </div>
       </section>
 
+      <!-- 06 Gameplay HUD -->
       <div id="hud" class="hidden">
-        <div class="hud-top">
-          <div class="chip"><i class="coin"></i><span id="hud-coins">0</span></div>
-          <div class="dist">
-            <div class="dist-bar"><i id="dist-fill"></i><b id="dist-crown" aria-hidden="true"></b></div>
-            <div class="dist-row"><span id="hud-dist">0 m</span><span id="hud-best">BEST 0 m</span></div>
+        <div class="stage">
+          <div class="hud-pills">
+            <span class="chip"><i class="coin"></i><b id="hud-coins">0</b></span>
+            <span class="chip"><img src="/assets/ui/gem.webp" alt="" /><b data-bind="gems">0</b></span>
+            <span class="chip small hidden" id="hud-shield"><img src="/assets/ui/shield.webp" alt="" />Shield</span>
+            <span class="chip small hidden" id="hud-doubler">×2 coins</span>
           </div>
-          <button class="icon-btn pause" id="btn-pause" aria-label="Pause">II</button>
+          <div class="hud-dist">
+            <div class="dist-bar"><i id="dist-fill"></i><b id="dist-crown" aria-hidden="true"></b></div>
+            <div class="dist-row"><span id="hud-dist">0 m</span><span id="hud-best">0 m</span></div>
+          </div>
+          <button class="pause-btn" id="btn-pause" aria-label="Pause"><i></i><i></i></button>
+          <div class="karen hidden" id="karen"><img src="/assets/avatars/karen9000.webp" alt="" /><span id="karen-text"></span></div>
+          <div class="powerups">
+            <button class="pu" id="pu-boost" aria-label="Use boost"><img src="/assets/ui/boost.webp" alt="" /><b id="pu-boost-n">0</b></button>
+            <button class="pu" id="pu-magnet" aria-label="Use magnet"><img src="/assets/ui/magnet.webp" alt="" /><b id="pu-magnet-n">0</b></button>
+          </div>
+          <svg class="gauges" viewBox="0 0 300 120" role="img" aria-label="Speed, fuel and derail gauges">
+            <defs>
+              <linearGradient id="gBezel" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#E9ECF2"/><stop offset="0.5" stop-color="#9AA1AE"/><stop offset="1" stop-color="#4E5462"/></linearGradient>
+              <radialGradient id="gFace" cx="0.5" cy="0.35" r="0.7"><stop offset="0" stop-color="#3A3D4A"/><stop offset="1" stop-color="#15161D"/></radialGradient>
+            </defs>
+            <g>
+              <circle cx="56" cy="64" r="54" fill="url(#gBezel)" stroke="#1A1A2E" stroke-width="3"/>
+              <circle cx="56" cy="64" r="46" fill="url(#gFace)"/>
+              <path d="M23.5 82.8 A38 38 0 1 1 88.9 45" fill="none" stroke="#6E7280" stroke-width="7"/>
+              <path d="M88.9 45 A38 38 0 0 1 88.9 83" fill="none" stroke="#E0201C" stroke-width="7"/>
+              <line x1="56" y1="64" x2="56" y2="28" stroke="#FF2D2D" stroke-width="4.5" stroke-linecap="round" class="needle" id="needle-speed"/>
+              <circle cx="56" cy="64" r="8" fill="#e9ecf2" stroke="#1A1A2E" stroke-width="2"/>
+              <text x="56" y="100" text-anchor="middle" class="g-label">SPEED</text>
+            </g>
+            <g>
+              <path d="M104 120 L104 78 A46 46 0 0 1 196 78 L196 120Z" fill="url(#gBezel)" stroke="#1A1A2E" stroke-width="3"/>
+              <path d="M111 120 L111 80 A39 39 0 0 1 189 80 L189 120Z" fill="url(#gFace)"/>
+              <path d="M122 92 A30 30 0 0 1 178 92" fill="none" stroke="#E0201C" stroke-width="6"/>
+              <path d="M150 62 A30 30 0 0 1 178 92" fill="none" stroke="#2ECC71" stroke-width="6"/>
+              <line x1="150" y1="100" x2="150" y2="72" stroke="#FF2D2D" stroke-width="4" stroke-linecap="round" class="needle" id="needle-fuel"/>
+              <circle cx="150" cy="100" r="6" fill="#e9ecf2" stroke="#1A1A2E" stroke-width="2"/>
+              <text x="122" y="114" text-anchor="middle" class="g-label">E</text>
+              <text x="178" y="114" text-anchor="middle" class="g-label">F</text>
+              <text x="150" y="116" text-anchor="middle" class="g-label small">CRANK</text>
+            </g>
+            <g transform="translate(188 0)">
+              <circle cx="56" cy="64" r="54" fill="url(#gBezel)" stroke="#1A1A2E" stroke-width="3"/>
+              <circle cx="56" cy="64" r="46" fill="url(#gFace)"/>
+              <path d="M23.5 82.8 A38 38 0 0 1 56 26" fill="none" stroke="#2ECC71" stroke-width="7"/>
+              <path d="M56 26 A38 38 0 0 1 88.9 45" fill="none" stroke="#F1C40F" stroke-width="7"/>
+              <path d="M88.9 45 A38 38 0 0 1 88.9 83" fill="none" stroke="#E0201C" stroke-width="7"/>
+              <line x1="56" y1="64" x2="56" y2="28" stroke="#FF2D2D" stroke-width="4.5" stroke-linecap="round" class="needle" id="needle-danger"/>
+              <circle cx="56" cy="64" r="8" fill="#e9ecf2" stroke="#1A1A2E" stroke-width="2"/>
+              <text x="56" y="100" text-anchor="middle" class="g-label">DERAIL</text>
+            </g>
+          </svg>
+          <button class="pedal brake" id="pedal-brake" aria-label="Brake"><i></i><i></i><i></i><i></i><i></i><i></i><b>BRAKE</b></button>
+          <button class="pedal gas" id="pedal-gas" aria-label="Gas"><i></i><i></i><i></i><i></i><i></i><i></i><b>GAS</b></button>
         </div>
-        <div class="fuel" aria-label="Fuel">
-          <img src="/assets/ui/fuel.webp" alt="" />
-          <div class="fuel-bar"><i id="fuel-fill"></i></div>
-        </div>
-        <div class="gauges" aria-hidden="true">
-          <div class="gauge"><svg viewBox="0 0 100 60"><path d="M10 55 A40 40 0 0 1 90 55" class="g-track"/><path d="M70 21 A40 40 0 0 1 90 55" class="g-red"/><line x1="50" y1="55" x2="50" y2="20" class="needle" id="needle-speed"/><circle cx="50" cy="55" r="6" class="hub"/></svg><span>SPEED</span></div>
-          <div class="gauge"><svg viewBox="0 0 100 60"><path d="M10 55 A40 40 0 0 1 50 15" class="g-green"/><path d="M50 15 A40 40 0 0 1 78 27" class="g-yellow"/><path d="M78 27 A40 40 0 0 1 90 55" class="g-red"/><line x1="50" y1="55" x2="50" y2="20" class="needle" id="needle-danger"/><circle cx="50" cy="55" r="6" class="hub"/></svg><span>DERAIL</span></div>
-        </div>
-        <div class="karen hidden" id="karen"><img src="/assets/ui/karen.webp" alt="" /><span id="karen-text"></span></div>
-        <button class="pedal brake" id="pedal-brake" aria-label="Brake"><i></i><i></i><i></i><i></i><i></i><i></i><b>BRAKE</b></button>
-        <button class="pedal gas" id="pedal-gas" aria-label="Gas"><i></i><i></i><i></i><i></i><i></i><i></i><b>GAS</b></button>
       </div>
 
+      <!-- 07 Pause -->
       <section id="pause" class="screen overlay" aria-label="Paused">
-        <div class="panel pause-panel">
-          <h2>Paused</h2>
-          <button class="btn btn-green" id="btn-resume">▶ Resume</button>
-          <button class="btn btn-slate" id="btn-restart">Restart ↻</button>
-          <button class="btn btn-slate" id="btn-quit">Main menu</button>
-          <p class="hint">Karen-9000 is filing an incident report.</p>
+        <div class="stage">
+          <div class="panel pause-panel">
+            <div class="pause-head"><h2>Paused</h2><button class="close-btn" id="btn-resume-x" aria-label="Resume">✕</button></div>
+            <button class="btn btn-green" id="btn-resume">▶ Resume</button>
+            <button class="btn btn-slate" id="btn-restart">Restart ↻</button>
+            <button class="btn btn-slate" id="btn-levels">Level Select</button>
+            <button class="btn btn-slate" id="btn-pause-settings">Settings</button>
+            <p class="hint">Karen-9000 is filing an incident report.</p>
+          </div>
         </div>
       </section>
 
-      <section id="results" class="screen overlay" aria-label="Run over">
-        <div class="panel results-panel">
-          <div class="ribbon"><img src="/assets/ui/ribbon.webp" alt="" /><span id="res-title">DERAILED!</span></div>
-          <p class="epitaph" id="res-epitaph"></p>
-          <div class="stats">
-            <div><span>Distance</span><b id="res-dist">0 m</b></div>
-            <div><span>Coins</span><b id="res-coins">+0</b></div>
-            <div><span>Best</span><b id="res-best">0 m</b></div>
-          </div>
-          <div class="row-buttons">
-            <button class="btn btn-blue" id="btn-retry">Retry ↻</button>
-            <button class="btn btn-green" id="btn-res-garage">Garage</button>
+      <!-- 08 Run complete -->
+      <section id="results" class="screen overlay results-bg" aria-label="Run over">
+        <div class="confetti" id="confetti" aria-hidden="true"></div>
+        <div class="stage">
+          <div class="panel results-panel">
+            <div class="ribbon"><img src="/assets/ui/ribbon.webp" alt="" /><span id="res-title">Run Complete!</span></div>
+            <div class="stars" id="res-stars" role="img"></div>
+            <div class="stats">
+              <div><img src="/assets/missions/distance.webp" alt="" /><span>Distance</span><b id="res-dist">0 m</b></div>
+              <div><i class="coin sm"></i><span>Coins</span><b id="res-coins">+0</b></div>
+              <div><img src="/assets/ui/trophy.webp" alt="" /><span>Best</span><b id="res-best">0 m</b></div>
+            </div>
+            <p class="epitaph" id="res-epitaph"></p>
+            <div class="row-buttons">
+              <button class="btn btn-blue" id="btn-retry">Retry ↻</button>
+              <button class="btn btn-green" id="btn-next">Next ▸</button>
+            </div>
           </div>
         </div>
+        <div class="results-foot">"Engagement achieved. Please rate your ride: 1 star to 1 star." — MegaCorp</div>
       </section>
+
+      <div id="toast" class="toast hidden" role="status"></div>
 
       <div id="rotate" class="screen overlay" aria-live="polite">
-        <div class="panel"><h2>Turn your phone sideways</h2><p class="hint">The Engagement Loop™ is a landscape experience.</p></div>
+        <div class="panel rotate-panel"><h2>Turn your phone sideways</h2><p class="hint">The Engagement Loop™ is a landscape experience.</p></div>
       </div>
     </div>
     <script type="module" src="/src/main.js"></script>

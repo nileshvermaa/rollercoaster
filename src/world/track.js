@@ -9,8 +9,9 @@ const SEG = WORLD.segment;
 const MAX_SLOPE = Math.tan(WORLD.maxSlopeDeg * DEG);
 
 export class Track {
-  constructor(seed = 1) {
+  constructor(seed = 1, { hills = 0 } = {}) {
     this.seed = seed;
+    this.hills = hills; // extra starting difficulty for later worlds
     this.rng = mulberry32(seed);
     this.h = []; // knot heights; knot i sits at x = i * SEG
     this.gaps = []; // { x0, x1 } sorted, rail absent in between
@@ -99,7 +100,7 @@ export class Track {
   _addKnot() {
     const i = this.h.length;
     const x = i * SEG;
-    const d = difficultyAt(x);
+    const d = Math.min(1, difficultyAt(x) + this.hills);
     const gentle = Math.abs(this.h[i - 1] - this.h[i - 2]) < 50; // jump knots skip the slope guard
     if (x > RUN.gapFromX && this.gapCooldown <= 0 && gentle && this.rng() < 0.06 + 0.12 * d) {
       this._addJump();
@@ -167,7 +168,7 @@ export class Track {
         if (!this.isGap(x) && !this.isGap(x - 300)) {
           this.items.push({ kind: 'fuel', x, y: this.at(x).y + 50, taken: false });
           const [lo, hi] = RUN.fuelEvery;
-          this.nextFuelX = x + lo + this.rng() * (hi - lo) * (1 + difficultyAt(x) * 0.6);
+          this.nextFuelX = x + lo + this.rng() * (hi - lo) * (1 + Math.min(1, difficultyAt(x) + this.hills) * 0.6);
         }
       }
     }

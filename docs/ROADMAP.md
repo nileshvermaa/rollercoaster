@@ -1,23 +1,22 @@
 # Roadmap
 
-What draft 0.1 has: one world, endless procedural track with hills, jump gaps and boosters,
-fuel and coins, derailing on crests/landings, six carts with upgrades, tilt + pedal + keyboard
-controls, Karen-9000 commentary, results and saved progress, CI with Vercel deploys.
+What draft 0.2 has: all 17 design-board screens; six worlds; endless procedural track with hills,
+jump gaps and boosters; a 3-car coaster train with seated riders and Dave's danger faces; fuel,
+coins and gems; derailing on crests/landings; six carts with upgrades; paints, trails and wheels;
+boost, magnet, shield and coin doubler; daily rewards, missions, the Night Carnival event, a daily
+challenge, offline leaderboard and profile; tilt + pedal + keyboard controls; CI with Vercel deploys.
 
 ## Next
 
 - **Full-resolution art**: replace the placeholder slices (see ART_PIPELINE.md).
 - **Feel pass on a real phone**: tilt range/dead zone, camera zoom, hill size curve, fuel spacing.
 - **Sound**: calliope loop that speeds up with the cart, clacks on climbs, Karen's voice blips, derail crash.
-- **Dave's face as the danger meter**: swap his expression sheet (calm → excited → terrified) by `run.danger`.
-- **Back-car passengers** that ragdoll out on a derail.
+- **Riders that ragdoll out on a derail.**
 
 ## Later
 
-- Worlds from the design doc: Night Carnival, Corporate Campus, Desert of Dead Startups, Snowflake
-  Peaks, Burnout Volcano (sky/layer swap by distance plus world tuning: ice friction, low gravity).
+- Full-resolution parallax layers for the five non-park worlds (today they are faded thumbnail cells).
 - Track features: loops (min speed), moving platforms, barriers, spikes, pendulums, switch junctions.
-- Power-ups: shield, magnet, slow time.
-- Screens from the design board: hub, level select, shop, events, daily rewards, missions,
-  leaderboard (needs a backend), profile.
+- Power-up: slow time (art exists in the shop sheet).
+- Online leaderboard and multiplayer (need a backend; today the leaderboard is offline rivals).
 - PWA: installable, fullscreen, landscape lock, offline.

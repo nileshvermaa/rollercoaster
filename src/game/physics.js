@@ -53,10 +53,10 @@ export function stepCart(c, track, stats, input, dt) {
       const throttle = c.fuel > 0 ? input.throttle : 0;
 
       let a = -g * sin + throttle * stats.engine - PHYS.drag * c.v * Math.abs(c.v);
-      if (Math.abs(c.v) > 1) a -= PHYS.rolling * Math.sign(c.v);
+      if (Math.abs(c.v) > 1) a -= PHYS.rolling * (stats.rollingMul ?? 1) * Math.sign(c.v);
       c.v += a * dt;
       if (input.brake > 0) {
-        const dv = PHYS.brake * input.brake * dt;
+        const dv = PHYS.brake * (stats.brakeMul ?? 1) * input.brake * dt;
         c.v = Math.abs(c.v) <= dv ? 0 : c.v - Math.sign(c.v) * dv;
       }
 
@@ -121,6 +121,18 @@ function launch(c, track) {
   c.angle = th;
   c.air = true;
   c.airTime = 0;
+}
+
+/** A shield turns a derail into a hard save: back on the rail at a crawl. */
+export function rescue(c, track) {
+  if (!c.crashed || c.crashed === 'fell') return false;
+  const p = track.at(c.x);
+  c.crashed = null;
+  c.air = false;
+  c.y = p.y;
+  c.angle = Math.atan(p.dy);
+  c.v = Math.max(150, Math.min(400, Math.hypot(c.vx, c.vy) * 0.35));
+  return true;
 }
 
 function crash(c, reason, events) {

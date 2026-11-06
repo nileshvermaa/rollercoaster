@@ -8,8 +8,10 @@ directive: *maximise rider engagement time*. The result is **The Engagement Loop
 never ends. You are Dave, 34, who just wanted one ride before his cousin's wedding. Karen-9000,
 the park's AI safety mascot, rides along and has opinions.
 
-> Draft 0.1: one world (Wobbleton Park), six carts, upgrades, fuel, jumps and derailing.
-> The art is first-draft placeholders. See [docs/ROADMAP.md](docs/ROADMAP.md).
+> Draft 0.2: every screen from the design board is in the game: loading, title, menu, home hub,
+> level select (6 worlds), gameplay, pause, run complete, garage, customize, shop, events, daily
+> rewards, missions, leaderboard, profile and settings. The art is still first-draft placeholders
+> sliced from composite sheets. See [docs/ROADMAP.md](docs/ROADMAP.md).
 
 ## How to play
 
@@ -20,12 +22,19 @@ the park's AI safety mascot, rides along and has opinions.
   you derail. Clean long landings pay a bonus.
 - **Yellow chevrons** are boosters. They always give exactly enough speed to clear the gap after them.
 - **CRANK™ cans** refill fuel. Out of fuel and stopped = run over.
-- Coins (and 1 coin per 10 m) buy carts and upgrades in the **Garage**.
+- Coins (and 1 coin per 10 m) buy carts and upgrades in the **Garage** and paint, trails and wheels
+  in **Customize**. Gems come from daily rewards, missions and first 3-star runs, and buy power-ups
+  in the **Shop**.
+- **Power-ups**: Boost (B) and Magnet (M) are buttons during a run; a Shield saves one bad landing
+  automatically; a Coin Doubler doubles the next runs' coins.
+- **Worlds** unlock by best distance; the **Night Carnival** event fills from long runs there;
+  **Challenge** is one seeded track per day.
 
 | Action | Phone | Keyboard |
 | --- | --- | --- |
 | Gas | Tilt right, or hold GAS | → / D / ↑ / W |
 | Brake | Tilt left, or hold BRAKE | ← / A / ↓ / S |
+| Boost / Magnet | Power-up buttons | B / M |
 | Pause | II button | Esc / P |
 
 Tilt uses the angle you hold the phone at when the run starts as neutral. Turn it off in Settings.
@@ -41,13 +50,13 @@ npm run check    # lint + unit tests + production build (what CI runs)
 ```
 src/
   main.js       boot
-  game/         the Game hub, pure physics, save data, and systems (run, render, hud, screens)
-  content/      data and tuning: physics numbers, carts and upgrades, Karen's lines
+  game/         the Game hub, pure physics, save data, progression rules, systems, screens
+  content/      data and tuning: physics, carts, worlds, cosmetics, shop, missions, rewards, Karen's lines
   world/        the procedural track (rail spline, gaps, boosters, pickups)
   engine/       math, input (keys, pedals, tilt), image loading
   styles/       CSS partials
 public/assets/  art (backgrounds, carts, UI)
-tests/          Vitest: track rules, physics, a careful-driver simulation, save data
+tests/          Vitest: track rules, physics, careful-driver simulation, save data, progression
 tools/art/      Python helpers that cut generated art out of its backgrounds
 docs/           architecture, design doc, art pipeline and image prompts, roadmap
 ```
