@@ -31,7 +31,24 @@ green #72C95A.*
 
 ---
 
+## Delivered
+
+- **All six worlds' gameplay layers** (`bg/{world}-sky|far|mid|near|ground`) and the weather strips
+  (`fx/embers|neon-sparkle|sand-wind|snow|steam`): installed from `fullresart/` in HD. The `ground`
+  layer textures the hills. Night Carnival has no `ground` yet (its hills use a colour fill).
+
+### Received but not usable as-is
+
+- `TRK001_rail_{world}.png`: straight trestle segments. The track is a curved spline, so a straight
+  picture can't be laid along it. The code rail's colours are matched to these instead.
+- `VEH001_basic-cart_paint-mask.png`: a different cart (has wheels, different body) from the game's
+  Basic cart, so it can't act as that cart's paint mask. If paint masks are wanted, export a
+  white version of exactly `public/assets/carts/basic.webp` (no wheels).
+
 ## Tier 1: backgrounds (biggest visual win, 5–14× too small today)
+
+Still needed: `bg/splash`, `bg/menu`, `bg/loading`, `bg/garage`, `event/banner`, and optionally
+`bg/night-ground`. The world layer prompts below are kept for reference.
 
 Parallax layers (`-far`, `-mid`, `-near`) are **3840×1080, transparent above the scenery, and tile
 seamlessly left to right**. The sky (`-sky`) is **1920×1080, fully painted**. Scenery sits in the
@@ -109,30 +126,6 @@ frames are code) · `event/reward` 512×512 neon cart on a pedestal.
 
 | File | Now | Target | Short by | Use |
 | --- | --- | --- | --- | --- |
-| `bg/mountain-sky.webp` | 276×76 | 1920×1080 | 14.2× | full-screen sky |
-| `bg/mountain-near.webp` | 279×76 | 3840×1080 | 14.2× | parallax layer, tiles horizontally |
-| `bg/mountain-mid.webp` | 280×76 | 3840×1080 | 14.2× | parallax layer, tiles horizontally |
-| `bg/mountain-far.webp` | 279×76 | 3840×1080 | 14.2× | parallax layer, tiles horizontally |
-| `bg/volcano-sky.webp` | 276×77 | 1920×1080 | 14.0× | full-screen sky |
-| `bg/volcano-near.webp` | 279×77 | 3840×1080 | 14.0× | parallax layer, tiles horizontally |
-| `bg/volcano-mid.webp` | 280×77 | 3840×1080 | 14.0× | parallax layer, tiles horizontally |
-| `bg/volcano-far.webp` | 279×77 | 3840×1080 | 14.0× | parallax layer, tiles horizontally |
-| `bg/snow-sky.webp` | 276×77 | 1920×1080 | 14.0× | full-screen sky |
-| `bg/snow-near.webp` | 279×77 | 3840×1080 | 14.0× | parallax layer, tiles horizontally |
-| `bg/snow-mid.webp` | 280×77 | 3840×1080 | 14.0× | parallax layer, tiles horizontally |
-| `bg/snow-far.webp` | 279×77 | 3840×1080 | 14.0× | parallax layer, tiles horizontally |
-| `bg/night-sky.webp` | 276×77 | 1920×1080 | 14.0× | full-screen sky |
-| `bg/night-near.webp` | 279×77 | 3840×1080 | 14.0× | parallax layer, tiles horizontally |
-| `bg/night-mid.webp` | 280×77 | 3840×1080 | 14.0× | parallax layer, tiles horizontally |
-| `bg/night-far.webp` | 279×77 | 3840×1080 | 14.0× | parallax layer, tiles horizontally |
-| `bg/desert-sky.webp` | 276×77 | 1920×1080 | 14.0× | full-screen sky |
-| `bg/desert-near.webp` | 279×77 | 3840×1080 | 14.0× | parallax layer, tiles horizontally |
-| `bg/desert-mid.webp` | 280×77 | 3840×1080 | 14.0× | parallax layer, tiles horizontally |
-| `bg/desert-far.webp` | 279×77 | 3840×1080 | 14.0× | parallax layer, tiles horizontally |
-| `bg/park-near.webp` | 1077×112 | 3840×1080 | 9.6× | parallax layer, tiles horizontally |
-| `bg/park-far.webp` | 1077×134 | 3840×1080 | 8.1× | parallax layer, tiles horizontally |
-| `bg/park-sky.webp` | 1071×163 | 1920×1080 | 6.6× | full-screen sky |
-| `bg/park-mid.webp` | 1077×174 | 3840×1080 | 6.2× | parallax layer, tiles horizontally |
 | `bg/menu.webp` | 520×218 | 1920×1080 | 5.0× | full-screen backdrop |
 | `bg/loading.webp` | 476×218 | 1920×1080 | 5.0× | full-screen backdrop |
 | `bg/garage.webp` | 501×218 | 1920×1080 | 5.0× | full-screen backdrop |
@@ -176,3 +169,37 @@ frames are code) · `event/reward` 512×512 neon cart on a pedestal.
 | `hub/events.webp` | 304×366 | 800×1000 | 2.7× | hub card |
 | `hub/adventure.webp` | 312×366 | 800×1000 | 2.7× | hub card |
 | `event/reward.webp` | 227×161 | 256×256 | 1.6× | icon |
+| `fx/steam.webp` | 1024×128 | 1024×128 | 1.0× | 8-frame effect strip |
+| `fx/snow.webp` | 1024×128 | 1024×128 | 1.0× | 8-frame effect strip |
+| `fx/sand-wind.webp` | 1024×128 | 1024×128 | 1.0× | 8-frame effect strip |
+| `fx/neon-sparkle.webp` | 1024×128 | 1024×128 | 1.0× | 8-frame effect strip |
+| `fx/embers.webp` | 1024×128 | 1024×128 | 1.0× | 8-frame effect strip |
+| `bg/volcano-sky.webp` | 1920×1080 | 1920×1080 | 1.0× | full-screen sky |
+| `bg/volcano-near.webp` | 2880×810 | 2880×810 | 1.0× | parallax layer, tiles horizontally |
+| `bg/volcano-mid.webp` | 2880×810 | 2880×810 | 1.0× | parallax layer, tiles horizontally |
+| `bg/volcano-ground.webp` | 2880×810 | 2880×810 | 1.0× | parallax layer, tiles horizontally |
+| `bg/volcano-far.webp` | 2880×810 | 2880×810 | 1.0× | parallax layer, tiles horizontally |
+| `bg/snow-sky.webp` | 1920×1080 | 1920×1080 | 1.0× | full-screen sky |
+| `bg/snow-near.webp` | 2880×810 | 2880×810 | 1.0× | parallax layer, tiles horizontally |
+| `bg/snow-mid.webp` | 2880×810 | 2880×810 | 1.0× | parallax layer, tiles horizontally |
+| `bg/snow-ground.webp` | 2880×810 | 2880×810 | 1.0× | parallax layer, tiles horizontally |
+| `bg/snow-far.webp` | 2880×810 | 2880×810 | 1.0× | parallax layer, tiles horizontally |
+| `bg/park-sky.webp` | 1920×1080 | 1920×1080 | 1.0× | full-screen sky |
+| `bg/park-near.webp` | 2880×810 | 2880×810 | 1.0× | parallax layer, tiles horizontally |
+| `bg/park-mid.webp` | 2880×810 | 2880×810 | 1.0× | parallax layer, tiles horizontally |
+| `bg/park-ground.webp` | 2880×810 | 2880×810 | 1.0× | parallax layer, tiles horizontally |
+| `bg/park-far.webp` | 2880×810 | 2880×810 | 1.0× | parallax layer, tiles horizontally |
+| `bg/night-sky.webp` | 1920×1080 | 1920×1080 | 1.0× | full-screen sky |
+| `bg/night-near.webp` | 2880×810 | 2880×810 | 1.0× | parallax layer, tiles horizontally |
+| `bg/night-mid.webp` | 2880×810 | 2880×810 | 1.0× | parallax layer, tiles horizontally |
+| `bg/night-far.webp` | 2880×810 | 2880×810 | 1.0× | parallax layer, tiles horizontally |
+| `bg/mountain-sky.webp` | 1920×1080 | 1920×1080 | 1.0× | full-screen sky |
+| `bg/mountain-near.webp` | 2880×810 | 2880×810 | 1.0× | parallax layer, tiles horizontally |
+| `bg/mountain-mid.webp` | 2880×810 | 2880×810 | 1.0× | parallax layer, tiles horizontally |
+| `bg/mountain-ground.webp` | 2880×810 | 2880×810 | 1.0× | parallax layer, tiles horizontally |
+| `bg/mountain-far.webp` | 2880×810 | 2880×810 | 1.0× | parallax layer, tiles horizontally |
+| `bg/desert-sky.webp` | 1920×1080 | 1920×1080 | 1.0× | full-screen sky |
+| `bg/desert-near.webp` | 2880×810 | 2880×810 | 1.0× | parallax layer, tiles horizontally |
+| `bg/desert-mid.webp` | 2880×810 | 2880×810 | 1.0× | parallax layer, tiles horizontally |
+| `bg/desert-ground.webp` | 2880×810 | 2880×810 | 1.0× | parallax layer, tiles horizontally |
+| `bg/desert-far.webp` | 2880×810 | 2880×810 | 1.0× | parallax layer, tiles horizontally |

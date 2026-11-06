@@ -54,15 +54,11 @@ export class Renderer {
   /** Load (once) and prepare a world's backdrop layers. */
   async prepareWorld(world) {
     if (this.worldCache.has(world.id)) return this.worldCache.get(world.id);
-    const raw = await loadImages(Object.fromEntries(Object.entries(world.layers).map(([k, v]) => [k, `/assets/${v}`])));
-    const layers = world.clean
-      ? raw
-      : {
-          sky: raw.sky,
-          far: raw.far && fadeTop(raw.far, 0.3, 0.6),
-          mid: raw.mid && fadeTop(raw.mid, 0.25, 0.55),
-          near: raw.near && fadeTop(raw.near, 0.4, 0.65),
-        };
+    const files = { ...world.layers };
+    for (const f of world.fx || []) files[`fx_${f}`] = `fx/${f}.webp`;
+    const raw = await loadImages(Object.fromEntries(Object.entries(files).map(([k, v]) => [k, `/assets/${v}`])));
+    const layers = { ...raw, soil: raw.ground ? soilTexture(raw.ground) : null, fx: {} };
+    for (const f of world.fx || []) if (raw[`fx_${f}`]) layers.fx[f] = raw[`fx_${f}`];
     this.worldCache.set(world.id, layers);
     return layers;
   }
@@ -76,7 +72,12 @@ export class Renderer {
     this.shake = 0;
     this.world = game.world;
     this.layers = this.worldCache.get(game.world.id) || {};
-    this.prepareWorld(game.world).then((l) => { if (this.world === game.world) this.layers = l; });
+    this.sky.setSprites(this.layers.fx || {});
+    this.prepareWorld(game.world).then((l) => {
+      if (this.world !== game.world) return;
+      this.layers = l;
+      this.sky.setSprites(l.fx);
+    });
     const seed = game.track.seed;
     this.riders = [RIDERS[0], RIDERS[1 + (seed % 4)]];
   }
@@ -134,7 +135,7 @@ export class Renderer {
     this.drawItems(track, x0, x1, game.time);
     this.particles.draw(ctx, (x) => this.sx(x), (y) => this.sy(y), z);
     this.drawTrain(game);
-    this.sky.drawFront(ctx);
+    this.sky.drawFront(ctx, w, h);
     this.drawSpeedLines(game);
     ctx.restore();
     ctx.globalAlpha = 1;
@@ -159,27 +160,34 @@ export class Renderer {
     ctx.fillStyle = g;
     ctx.fillRect(0, 0, w, h);
     if (L.sky) {
-      const s = Math.max(w / L.sky.width, (h * 0.75) / L.sky.height);
-      ctx.drawImage(L.sky, (w - L.sky.width * s) / 2, 0, L.sky.width * s, L.sky.height * s);
+      // Cover the screen, drifting a touch with distance so the sky isn't pinned.
+      const s = Math.max(w / L.sky.width, h / L.sky.height) * 1.08;
+      const dw = L.sky.width * s, dh = L.sky.height * s;
+      const drift = ((this.camX * this.zoom * 0.01) % (dw - w + 1));
+      ctx.drawImage(L.sky, -drift, 0, dw, dh);
     }
-    this.sky.drawBack(ctx, w, h, kind);
-    const lift = clamp((this.camY - this.startY) * this.zoom, -h * 0.5, h * 0.5);
-    this.layer(L.far, 0.04, 0.26, 0.66, lift * 0.15, W.wood[1]);
-    this.layer(L.mid, 0.12, 0.38, 0.75, lift * 0.3, W.ground[1]);
-    if (!this.low) this.layer(L.near, 0.3, 0.24, 0.83, lift * 0.5, W.grass[0]);
+    this.sky.drawBack(ctx, w, h, L.sky ? { ...kind, clouds: null } : kind); // painted skies have their own clouds
+    // Full-frame layers, painted to stack: each one is the whole screen tall, bottom-anchored,
+    // tiling sideways at its own parallax speed and sinking a little as the train climbs.
+    const lift = clamp((this.camY - this.startY) * this.zoom, -h * 0.4, h * 0.6);
+    this.layer(L.far, 0.05, lift * 0.06, W.wood[1]);
+    this.layer(L.mid, 0.14, lift * 0.14, W.ground[1]);
+    if (!this.low) this.layer(L.near, 0.32, lift * 0.26, W.ground[1]);
   }
 
-  layer(im, factor, heightFrac, bottomFrac, lift, fill) {
+  layer(im, factor, lift, fill) {
     if (!im) return;
     const { ctx, w, h } = this;
-    const dh = h * heightFrac;
+    const dh = h * 1.04;
     const dw = (im.width * dh) / im.height;
-    const bottom = h * bottomFrac + lift;
+    const bottom = h + 4 + lift;
     let off = -((this.camX * this.zoom * factor) % dw);
     if (off > 0) off -= dw;
     for (let x = off; x < w; x += dw - 1) ctx.drawImage(im, x, bottom - dh, dw, dh);
-    ctx.fillStyle = fill;
-    ctx.fillRect(0, bottom - 1, w, h - bottom + 1);
+    if (bottom < h) {
+      ctx.fillStyle = fill;
+      ctx.fillRect(0, bottom - 1, w, h - bottom + 1);
+    }
   }
 
   drawTerrain(track, x0, x1, W) {
@@ -190,10 +198,24 @@ export class Renderer {
     for (let x = x0; x <= x1 + 24; x += 24) ctx.lineTo(this.sx(x), this.sy(track.groundAt(x)));
     ctx.lineTo(this.sx(x1 + 24), h);
     ctx.closePath();
-    const g = ctx.createLinearGradient(0, this.sy(track.groundAt(this.camX + 300)), 0, h);
-    g.addColorStop(0, W.ground[0]); g.addColorStop(1, W.ground[1]);
-    ctx.fillStyle = g;
-    ctx.fill();
+    const soil = this.layers?.soil;
+    if (soil) {
+      // The world's painted soil, pinned to world space so it scrolls with the hills.
+      if (this.soilFor !== soil) { this.soilPattern = ctx.createPattern(soil, 'repeat'); this.soilFor = soil; }
+      const k = (170 / soil.height) * z;
+      this.soilPattern.setTransform(new DOMMatrix([k, 0, 0, k, this.sx(0), this.sy(0)]));
+      ctx.fillStyle = this.soilPattern;
+      ctx.fill();
+      const shade = ctx.createLinearGradient(0, this.sy(track.groundAt(this.camX + 300)), 0, h);
+      shade.addColorStop(0, 'rgba(0,0,0,0)'); shade.addColorStop(1, 'rgba(0,0,0,0.35)');
+      ctx.fillStyle = shade;
+      ctx.fill();
+    } else {
+      const g = ctx.createLinearGradient(0, this.sy(track.groundAt(this.camX + 300)), 0, h);
+      g.addColorStop(0, W.ground[0]); g.addColorStop(1, W.ground[1]);
+      ctx.fillStyle = g;
+      ctx.fill();
+    }
     ctx.beginPath();
     for (let x = x0; x <= x1 + 24; x += 24) {
       const X = this.sx(x), Y = this.sy(track.groundAt(x)) + 3 * z;
@@ -509,19 +531,27 @@ export const RENDER_IMAGES = {
   ...Object.fromEntries(CARTS.map((c) => [`cart_${c.id}`, `/assets/${c.img}`])),
 };
 
-function fadeTop(img, from, to) {
+/**
+ * Cut the soil band out of a world's ground layer (below its grass line) into a tileable texture.
+ * The ground art is a strip at the bottom of a transparent frame, so find where it starts first.
+ */
+function soilTexture(img) {
+  const probe = document.createElement('canvas');
+  probe.width = 64; probe.height = 256;
+  const pg = probe.getContext('2d', { willReadFrequently: true });
+  pg.drawImage(img, 0, 0, 64, 256);
+  const data = pg.getImageData(0, 0, 64, 256).data;
+  let top = 0;
+  for (let y = 0; y < 256; y++) {
+    let solid = 0;
+    for (let x = 0; x < 64; x++) if (data[(y * 64 + x) * 4 + 3] > 200) solid++;
+    if (solid > 56) { top = y; break; }
+  }
+  const y0 = img.height * (top / 256), band = img.height - y0;
+  const from = y0 + band * 0.4; // skip the grass, keep the dirt and stones
   const c = document.createElement('canvas');
-  c.width = img.width; c.height = img.height;
-  const g = c.getContext('2d');
-  g.drawImage(img, 0, 0);
-  g.globalCompositeOperation = 'destination-in';
-  const grad = g.createLinearGradient(0, 0, 0, img.height);
-  grad.addColorStop(0, 'rgba(0,0,0,0)');
-  grad.addColorStop(from, 'rgba(0,0,0,0)');
-  grad.addColorStop(to, 'rgba(0,0,0,1)');
-  grad.addColorStop(1, 'rgba(0,0,0,1)');
-  g.fillStyle = grad;
-  g.fillRect(0, 0, img.width, img.height);
+  c.width = img.width; c.height = Math.max(8, Math.round(img.height - from));
+  c.getContext('2d').drawImage(img, 0, from, img.width, c.height, 0, 0, img.width, c.height);
   return c;
 }
 

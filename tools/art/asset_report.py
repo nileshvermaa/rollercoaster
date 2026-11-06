@@ -14,7 +14,6 @@ ROOT = Path(__file__).resolve().parents[2] / "public" / "assets"
 # (path prefix or exact path, target width, target height, why)
 TARGETS = [
     ("bg/park-sky", 1920, 1080, "full-screen sky"),
-    ("bg/park-", 3840, 1080, "parallax layer, tiles horizontally"),
     ("bg/", 1920, 1080, "full-screen backdrop"),
     ("event/banner", 1920, 800, "full-screen event backdrop"),
     ("hub/", 800, 1000, "hub card"),
@@ -25,6 +24,7 @@ TARGETS = [
     ("riders/", 512, 512, "seated rider"),
     ("avatars/", 512, 512, "portrait / frame"),
     ("trails/", 1024, 256, "boost trail"),
+    ("fx/", 1024, 128, "8-frame effect strip"),
     ("ui/logo", 2048, 1024, "logo"),
     ("ui/ribbon", 1536, 384, "results ribbon"),
     ("ui/plinth", 1024, 512, "display platform"),
@@ -36,9 +36,9 @@ TARGETS = [
 def target_for(rel):
     for prefix, w, h, why in TARGETS:
         if rel.startswith(prefix):
-            # World layers other than the sky tile horizontally, so they want double width.
-            if rel.startswith("bg/") and rel.split("-")[-1].split(".")[0] in ("far", "mid", "near"):
-                return 3840, 1080, "parallax layer, tiles horizontally"
+            # Parallax layers tile horizontally; shipped at 2880x810 to keep each world ~2 MB.
+            if rel.startswith("bg/") and rel.split("-")[-1].split(".")[0] in ("far", "mid", "near", "ground"):
+                return 2880, 810, "parallax layer, tiles horizontally"
             if rel.startswith("bg/") and rel.endswith("-sky.webp"):
                 return 1920, 1080, "full-screen sky"
             return w, h, why

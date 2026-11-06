@@ -172,6 +172,13 @@ export class Sky {
     this.sparks = [];
     this.weather = [];
     this.nextRocket = 1;
+    this.sprites = {};
+  }
+
+  /** Painted 8-frame weather strips for the current world (name -> image), if loaded. */
+  setSprites(map) {
+    this.sprites = map || {};
+    this.weather.length = 0;
   }
 
   update(dt, kind, w, h, low) {
@@ -205,8 +212,11 @@ export class Sky {
     }
 
     if (kind.weather) {
-      const want = low ? 40 : 110;
+      // Painted sprites carry several flakes/embers each, so far fewer are needed than dots.
+      const sprite = this.sprites[SPRITE_FOR[kind.weather]];
+      const want = sprite ? (low ? 6 : SPRITE_COUNT[kind.weather]) : low ? 40 : 110;
       while (this.weather.length < want) this.weather.push(this.spawnWeather(kind.weather, w, h, true));
+      if (this.weather.length > want) this.weather.length = want;
       for (let i = 0; i < this.weather.length; i++) {
         const p = this.weather[i];
         p.x += p.vx * dt; p.y += p.vy * dt; p.t += dt;
@@ -215,8 +225,31 @@ export class Sky {
     } else this.weather.length = 0;
   }
 
+  /** Occasional steam plumes rising from the ground (volcano). */
+  drawSteam(ctx, img, w, h) {
+    this.plumes = this.plumes || [];
+    if (this.plumes.length < 3 && Math.random() < 0.01) this.plumes.push({ x: Math.random() * w, t: 0 });
+    const fw = img.width / 8;
+    for (let i = this.plumes.length - 1; i >= 0; i--) {
+      const p = this.plumes[i];
+      p.t += 1 / 60;
+      if (p.t > 2) { this.plumes.splice(i, 1); continue; }
+      const frame = Math.min(7, Math.floor(p.t * 4)), S = h * 0.45;
+      ctx.globalAlpha = 0.55;
+      ctx.drawImage(img, frame * fw, 0, fw, img.height, p.x - S / 2, h * 0.62 - S, S, S);
+      ctx.globalAlpha = 1;
+    }
+  }
+
   spawnWeather(type, w, h, anywhere) {
     const r = Math.random;
+    const base = this.spawnBase(type, w, h, anywhere, r);
+    base.seed = Math.floor(r() * 8);
+    base.scale = 0.7 + r() * 0.6;
+    return base;
+  }
+
+  spawnBase(type, w, h, anywhere, r) {
     if (type === 'snow') return { type, x: r() * w, y: anywhere ? r() * h : -5, vx: -20 - r() * 30, vy: 30 + r() * 50, s: 1.5 + r() * 2.5, t: r() * 10 };
     if (type === 'embers') return { type, x: r() * w, y: anywhere ? r() * h : h + 5, vx: -15 + r() * 30, vy: -(30 + r() * 60), s: 1.5 + r() * 2, t: r() * 10 };
     if (type === 'sand') return { type, x: anywhere ? r() * w : w + 5, y: h * (0.3 + r() * 0.6), vx: -(160 + r() * 200), vy: -5 + r() * 10, s: 1 + r() * 1.5, t: 0 };
@@ -252,8 +285,19 @@ export class Sky {
     }
   }
 
-  drawFront(ctx) {
+  drawFront(ctx, w, h) {
+    const steam = this.sprites.steam;
+    if (steam) this.drawSteam(ctx, steam, w, h);
     for (const p of this.weather) {
+      const sprite = this.sprites[SPRITE_FOR[p.type]];
+      if (sprite) {
+        const fw = sprite.width / 8, frame = Math.floor(p.t * 8 + p.seed) % 8;
+        const S = h * SPRITE_SIZE[p.type] * p.scale;
+        ctx.globalAlpha = p.type === 'sand' ? 0.75 : 0.95;
+        ctx.drawImage(sprite, frame * fw, 0, fw, sprite.height, p.x - S / 2, p.y - S / 2, S, S);
+        ctx.globalAlpha = 1;
+        continue;
+      }
       if (p.type === 'snow') { ctx.fillStyle = 'rgba(255,255,255,0.85)'; p.x += Math.sin(p.t * 2) * 0.3; }
       else if (p.type === 'embers') ctx.fillStyle = `rgba(255,${120 + Math.sin(p.t * 6) * 60},40,0.9)`;
       else if (p.type === 'sand') ctx.fillStyle = 'rgba(240,200,130,0.5)';
@@ -263,6 +307,10 @@ export class Sky {
     }
   }
 }
+
+const SPRITE_FOR = { snow: 'snow', embers: 'embers', sand: 'sand-wind', neon: 'neon-sparkle' };
+const SPRITE_COUNT = { snow: 16, embers: 14, sand: 5, neon: 10 };
+const SPRITE_SIZE = { snow: 0.17, embers: 0.15, sand: 0.42, neon: 0.2 };
 
 /** Per-world sky life. */
 export const SKY_KIND = {
