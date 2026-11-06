@@ -98,8 +98,7 @@
 .level-card.locked .meta small { color: var(--muted); }
 
 /* 09 Garage */
-.plinth { position: absolute; left: 70px; top: 196px; width: 360px; height: 108px; }
-.garage-cart { position: absolute; left: 110px; top: 96px; width: 280px; height: 140px; object-fit: contain; filter: drop-shadow(0 10px 8px rgba(0, 0, 0, 0.45)); }
+.garage-cart { position: absolute; left: 110px; top: 110px; width: 280px; height: 140px; object-fit: contain; filter: drop-shadow(0 10px 8px rgba(0, 0, 0, 0.45)); }
 .garage-cart.locked { filter: brightness(0.35) drop-shadow(0 10px 8px rgba(0, 0, 0, 0.45)); }
 .garage-name { position: absolute; left: 130px; top: 58px; width: 240px; text-align: center; }
 .rarity { display: inline-block; margin-top: 2px; padding: 1px 10px; border-radius: 999px; border: 2px solid var(--ink); font-size: 11px; font-weight: 900; background: linear-gradient(180deg, #f4a6d7, #b04fa0); }
@@ -128,8 +127,7 @@
 
 /* 10 Customize */
 .cz-preview { position: absolute; left: 14px; top: 64px; width: 400px; height: 250px; overflow: hidden; border-radius: 18px; border: 2px solid var(--edge); background: radial-gradient(ellipse at 50% 70%, #4a3f8a, var(--midnight) 70%); }
-.cz-plinth { position: absolute; left: 40px; top: 150px; width: 320px; height: 96px; }
-.cz-trail { position: absolute; left: 0; top: 108px; width: 130px; height: 56px; object-fit: contain; }
+.cz-trail { position: absolute; left: -10px; top: 80px; width: 260px; height: 112px; pointer-events: none; }
 .cz-cart { position: absolute; left: 80px; top: 52px; width: 260px; height: 130px; object-fit: contain; filter: drop-shadow(0 8px 6px rgba(0, 0, 0, 0.45)); }
 .cz-actions { position: absolute; left: 14px; top: 324px; width: 400px; display: flex; gap: 10px; }
 .cz-actions .btn:first-child { flex: 1; }

@@ -1,6 +1,6 @@
 // Missions, Leaderboard, Profile and Settings.
 
-import { $, h, img, fmt, toast } from '../dom.js';
+import { $, h, img, icon, fmt, toast } from '../dom.js';
 import { missionList, missionProgress, claimMission, leaderboard, totalStars } from '../progress.js';
 import { ACHIEVEMENTS } from '../../content/missions.js';
 import { defaultSave } from '../save.js';
@@ -8,8 +8,8 @@ import { defaultSave } from '../save.js';
 let missionTab = 'daily';
 let lbTab = 'global';
 
-const rewardLabel = (r) =>
-  r.gems ? [h('img', { src: '/assets/ui/gem.webp', alt: 'gems', className: 'gem-i' }), ` ${r.gems}`] : [h('i', { className: 'coin sm' }), ` ${fmt(r.coins)}`];
+const rewardLabel = (r) => (r.gems ? [icon('gem', 'gem-i'), ` ${r.gems}`] : [icon('coin', 'gem-i'), ` ${fmt(r.coins)}`]);
+const MISSION_ICON = { distance: 'flag', coins: 'coins', boost: 'boost', stunt: 'loop', crash: 'crash' };
 
 export function renderMissions(game) {
   const { save } = game;
@@ -17,14 +17,14 @@ export function renderMissions(game) {
   $('mission-tabs').replaceChildren(...Object.entries(tabs).map(([k, label]) =>
     h('button', { className: `tab${k === missionTab ? ' on' : ''}`, onclick: () => { missionTab = k; renderMissions(game); } }, label)));
   const list = missionList(save, missionTab);
-  $('mission-list').replaceChildren(...list.map((m) => {
+  $('mission-list').replaceChildren(...list.map((m, i) => {
     const p = Math.min(missionProgress(save, missionTab, m), m.target);
     const done = p >= m.target;
     const claimed = save.missions[missionTab].claimed.includes(m.id);
     const pct = Math.round((p / m.target) * 100);
     const count = m.stat === 'airtime' ? `${p.toFixed(1)} / ${m.target} s` : `${fmt(p)} / ${fmt(m.target)}`;
-    return h('div', { className: 'mission' },
-      img(`missions/${m.icon}.webp`, ''),
+    return h('div', { className: 'mission', style: `--i:${i}` },
+      icon(MISSION_ICON[m.icon] || 'flag', 'm-ico'),
       h('div', { className: 'mtext' }, m.text,
         h('span', { className: 'mbar' }, h('span', { className: `bar${done ? ' done' : ''}` }, h('i', { style: `width:${pct}%` })), count)),
       h('span', { className: 'reward' }, rewardLabel(m.reward)),
@@ -33,7 +33,7 @@ export function renderMissions(game) {
         : done
           ? h('button', {
               className: 'btn btn-green',
-              onclick: () => { const got = claimMission(save, missionTab, m.id); if (got) { game.persist(); toast(`+${got}`); game.refresh(); } },
+              onclick: () => { const got = claimMission(save, missionTab, m.id); if (got) { game.sound.play('claim'); game.persist(); toast(`+${got}`); game.refresh(); } },
             }, 'Claim')
           : h('span', { className: 'state' }, 'In progress'));
   }));
@@ -44,9 +44,9 @@ export function renderLeaderboard(game) {
   $('lb-tabs').replaceChildren(...Object.entries(tabs).map(([k, label]) =>
     h('button', { className: `tab${k === lbTab ? ' on' : ''}`, onclick: () => { lbTab = k; renderLeaderboard(game); } }, label)));
   const { rows } = leaderboard(game.save, lbTab);
-  $('lb-rows').replaceChildren(...rows.map((r) =>
-    h('div', { className: `lb-row${r.me ? ' me' : ''}` },
-      h('span', { className: 'rank' }, r.rank <= 3 ? img(`ui/medal-${r.rank}.webp`, `Rank ${r.rank}`) : String(r.rank)),
+  $('lb-rows').replaceChildren(...rows.map((r, i) =>
+    h('div', { className: `lb-row${r.me ? ' me' : ''}`, style: `--i:${i}` },
+      h('span', { className: 'rank', 'aria-label': `Rank ${r.rank}` }, r.rank <= 3 ? icon(`medal-${r.rank}`, 'medal') : String(r.rank)),
       img(`avatars/${r.avatar}.webp`, '', 'av'),
       h('span', { className: 'nm' }, r.name),
       h('span', { className: 'sc' }, `${fmt(r.score)} m`))));
@@ -69,13 +69,11 @@ export function renderProfile(game) {
   $('profile-name').value = save.name;
   const trophies = save.missions.ach.claimed.filter((id) => ACHIEVEMENTS.some((a) => a.id === id)).length;
   const card = (pic, n, label) => h('div', { className: 'stat-card' }, pic, h('b', {}, n), h('small', {}, label));
-  const star = h('span', { style: 'width:48px;height:50px;overflow:hidden;position:relative;display:block' },
-    h('img', { src: '/assets/ui/stars.webp', alt: '', style: 'position:absolute;left:0;top:0;width:150px;height:50px' }));
   $('profile-stats').replaceChildren(
-    card(star, fmt(totalStars(save)), 'Stars'),
-    card(img('ui/trophy.webp', ''), fmt(trophies), 'Trophies'),
+    card(icon('star', 'card-ico'), fmt(totalStars(save)), 'Stars'),
+    card(icon('trophy', 'card-ico'), fmt(trophies), 'Trophies'),
     card(img('carts/basic.webp', ''), fmt(save.owned.length), 'Carts'),
-    card(img('missions/crash.webp', ''), fmt(save.stats.derails), 'Derails'),
+    card(icon('crash', 'card-ico'), fmt(save.stats.derails), 'Derails'),
   );
 }
 
@@ -88,6 +86,7 @@ export function bindSettings(game) {
         toast('Motion access was not granted. Pedals and keys still work.');
       }
       game.save.settings[key] = input.checked;
+      game.applySettings();
       game.persist();
     });
   }

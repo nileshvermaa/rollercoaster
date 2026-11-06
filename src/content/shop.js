@@ -3,13 +3,13 @@
 export const SHOP_TABS = ['featured', 'powerups', 'currency', 'skins'];
 
 export const SHOP_ITEMS = [
-  { id: 'doubler', tab: 'powerups', name: 'Coin Doubler', qty: '3 runs', img: 'shop/coin-doubler.webp', gems: 50, tag: 'HOT', featured: true,
+  { id: 'doubler', tab: 'powerups', name: 'Coin Doubler', qty: '3 runs', icon: 'doubler', gems: 50, tag: 'HOT', featured: true,
     grant: { inventory: { doubler: 3 } } },
-  { id: 'boosts', tab: 'powerups', name: 'Boost Refill', qty: 'x5', img: 'ui/boost.webp', gems: 40, featured: true,
+  { id: 'boosts', tab: 'powerups', name: 'Boost Refill', qty: 'x5', icon: 'boost', gems: 40, featured: true,
     grant: { inventory: { boost: 5 } } },
-  { id: 'shields', tab: 'powerups', name: 'Shield', qty: 'x3', img: 'ui/shield.webp', gems: 60, featured: true,
+  { id: 'shields', tab: 'powerups', name: 'Shield', qty: 'x3', icon: 'shield', gems: 60, featured: true,
     grant: { inventory: { shield: 3 } } },
-  { id: 'magnets', tab: 'powerups', name: 'Magnet', qty: 'x3', img: 'ui/magnet.webp', gems: 50, featured: true,
+  { id: 'magnets', tab: 'powerups', name: 'Magnet', qty: 'x3', icon: 'magnet', gems: 50, featured: true,
     grant: { inventory: { magnet: 3 } } },
   { id: 'coins-s', tab: 'currency', name: 'Pile of Coins', qty: '5,000', img: 'shop/coin-pile.webp', gems: 20, featured: true,
     grant: { coins: 5000 } },

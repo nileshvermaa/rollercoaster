@@ -10,7 +10,6 @@ challenge, offline leaderboard and profile; tilt + pedal + keyboard controls; CI
 
 - **Full-resolution art**: replace the placeholder slices (see ART_PIPELINE.md).
 - **Feel pass on a real phone**: tilt range/dead zone, camera zoom, hill size curve, fuel spacing.
-- **Sound**: calliope loop that speeds up with the cart, clacks on climbs, Karen's voice blips, derail crash.
 - **Riders that ragdoll out on a derail.**
 
 ## Later

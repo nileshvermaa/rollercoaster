@@ -1,6 +1,6 @@
 // Shop, Events and Daily rewards.
 
-import { $, h, img, toast } from '../dom.js';
+import { $, h, img, icon, toast } from '../dom.js';
 import { SHOP_ITEMS, SHOP_TABS } from '../../content/shop.js';
 import { DAILY_REWARDS, EVENT } from '../../content/rewards.js';
 import { buyShopItem, dailyState, claimDaily, eventEndsIn, claimEvent } from '../progress.js';
@@ -8,26 +8,28 @@ import { buyShopItem, dailyState, claimDaily, eventEndsIn, claimEvent } from '..
 const TAB_LABEL = { featured: 'Featured', powerups: 'Power-ups', currency: 'Currency', skins: 'Skins' };
 let shopTab = 'featured';
 
-const gemPrice = (n) => [h('img', { src: '/assets/ui/gem.webp', alt: 'gems', className: 'gem-i' }), ` ${n}`];
+const gemPrice = (n) => [icon('gem', 'gem-i'), ` ${n}`];
+const art = (it) => (it.icon ? icon(it.icon, 'item-ico') : img(it.img, ''));
 
 export function renderShop(game) {
   const { save } = game;
   $('shop-tabs').replaceChildren(...SHOP_TABS.map((t) =>
     h('button', { className: `tab${t === shopTab ? ' on' : ''}`, onclick: () => { shopTab = t; renderShop(game); } }, TAB_LABEL[t])));
   const items = SHOP_ITEMS.filter((i) => (shopTab === 'featured' ? i.featured : i.tab === shopTab));
-  $('shop-grid').replaceChildren(...items.map((it) => {
+  $('shop-grid').replaceChildren(...items.map((it, i) => {
     const sold = it.once && save.shop.bought.includes(it.id);
     const owned = it.grant.inventory ? Object.entries(it.grant.inventory).map(([k]) => `You have ${save.inventory[k]}`)[0] : null;
-    return h('div', { className: 'shop-card' },
+    return h('div', { className: 'shop-card', style: `--i:${i}` },
       it.tag && h('span', { className: 'tag' }, it.tag),
-      img(it.img, ''),
+      art(it),
       h('b', {}, it.name),
       h('small', {}, owned ? `${it.qty} · ${owned}` : it.qty),
       h('button', {
         className: 'btn btn-green', disabled: sold || save.gems < it.gems,
         onclick: () => {
           const got = buyShopItem(save, it);
-          if (!got) return toast('Not enough gems. Earn them from daily rewards and missions.');
+          if (!got) { game.sound.play('error'); return toast('Not enough gems. Earn them from daily rewards and missions.'); }
+          game.sound.play('buy');
           game.persist();
           toast(`Got ${got}.`);
           game.refresh();
@@ -41,6 +43,7 @@ export function bindEvents(game) {
     const { save } = game;
     if (save.event.progress >= EVENT.goal && !save.event.claimed) {
       const got = claimEvent(save);
+      game.sound.play('claim');
       game.persist();
       toast(`Event reward: ${got}! Equip it in Customize.`);
       return game.refresh();
@@ -66,6 +69,7 @@ export function bindRewards(game) {
   $('reward-claim').addEventListener('click', () => {
     const got = claimDaily(game.save);
     if (!got) return;
+    game.sound.play('claim');
     game.persist();
     toast(`Claimed ${got}!`);
     game.refresh();
@@ -75,11 +79,12 @@ export function bindRewards(game) {
 export function renderRewards(game) {
   const st = dailyState(game.save);
   $('reward-days').replaceChildren(...DAILY_REWARDS.map((r, i) => {
+    const pic = r.icon ? icon(r.icon, 'day-ico') : img(r.img, '');
     const claimed = i < st.index || (!st.canClaim && i === st.index);
     const today = st.canClaim && i === st.index;
     const cls = ['day', r.big && 'big', claimed && 'claimed', today && 'today'].filter(Boolean).join(' ');
-    return h('div', { className: cls, 'aria-label': `Day ${i + 1}${claimed ? ', claimed' : today ? ', ready' : ''}` },
-      h('b', {}, `Day ${i + 1}`), img(r.img, ''), h('span', {}, r.label),
+    return h('div', { className: cls, style: `--i:${i}`, 'aria-label': `Day ${i + 1}${claimed ? ', claimed' : today ? ', ready' : ''}` },
+      h('b', {}, `Day ${i + 1}`), pic, h('span', {}, r.label),
       claimed && h('span', { className: 'tick', 'aria-hidden': 'true' }, '✓'));
   }));
   const btn = $('reward-claim');

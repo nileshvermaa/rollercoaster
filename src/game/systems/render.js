@@ -6,6 +6,8 @@ import { clamp, damp } from '../../engine/math.js';
 import { loadImages } from '../../engine/assets.js';
 import { cosmeticById } from '../../content/cosmetics.js';
 import { CARTS } from '../../content/carts.js';
+import { Particles, Sky, SKY_KIND, drawWheel, drawFlame, emitTrail, emitSparks } from './fx.js';
+import { iconImage } from '../../ui/icons.js';
 
 const CAR_LEN = 128; // world px per car
 const CAR_GAP = 10;
@@ -22,8 +24,11 @@ export class Renderer {
     this.camX = 0;
     this.camY = 0;
     this.startY = 0;
-    this.particles = [];
+    this.particles = new Particles();
+    this.sky = new Sky();
+    this.shake = 0;
     this.glow = makeGlow();
+    iconImage('fuel', 128).then((im) => (this.fuelImg = im));
     this.coin = makeCoin();
     this.worldCache = new Map();
     this.tinted = new Map();
@@ -67,7 +72,8 @@ export class Renderer {
     this.camY = this.startY = cart.y;
     this.camX = cart.x;
     this.zoom = this.baseZoom();
-    this.particles.length = 0;
+    this.particles.list.length = 0;
+    this.shake = 0;
     this.world = game.world;
     this.layers = this.worldCache.get(game.world.id) || {};
     this.prepareWorld(game.world).then((l) => { if (this.world === game.world) this.layers = l; });
@@ -95,8 +101,12 @@ export class Renderer {
     for (let i = 0; i < n; i++) {
       const a = Math.random() * Math.PI * 2;
       const s = speed * (0.3 + Math.random() * 0.7);
-      this.particles.push({ x, y, vx: Math.cos(a) * s, vy: Math.sin(a) * s + 80, life: 0.5 + Math.random() * 0.4, color, size: 3 + Math.random() * 4 });
+      this.particles.add({ x, y, vx: Math.cos(a) * s, vy: Math.sin(a) * s + 80, life: 0.5 + Math.random() * 0.4, age: 0, color, size: 4 + Math.random() * 5, shape: 'square', spin: (Math.random() - 0.5) * 12 });
     }
+  }
+
+  addShake(amount) {
+    this.shake = Math.max(this.shake, amount);
   }
 
   draw(game, dt) {
@@ -107,13 +117,26 @@ export class Renderer {
     const x1 = this.camX + (w + 60) / z;
     const W = this.world || game.world;
 
-    this.drawBackdrop(W);
+    const kind = SKY_KIND[W.id] || {};
+    this.sky.update(dt, kind, w, h, this.low);
+    this.particles.update(dt);
+    this.emitFx(game, dt);
+
+    ctx.save();
+    if (this.shake > 0.3) {
+      ctx.translate((Math.random() - 0.5) * this.shake, (Math.random() - 0.5) * this.shake);
+      this.shake *= Math.exp(-10 * dt);
+    }
+    this.drawBackdrop(W, kind);
     this.drawTerrain(track, x0, x1, W);
     this.drawSupports(track, x0, x1, W);
     this.drawRail(track, x0, x1, game.time, W);
     this.drawItems(track, x0, x1, game.time);
-    this.drawParticles(dt);
+    this.particles.draw(ctx, (x) => this.sx(x), (y) => this.sy(y), z);
     this.drawTrain(game);
+    this.sky.drawFront(ctx);
+    this.drawSpeedLines(game);
+    ctx.restore();
     ctx.globalAlpha = 1;
 
     if (game.run.magnet > 0) {
@@ -128,7 +151,7 @@ export class Renderer {
     }
   }
 
-  drawBackdrop(W) {
+  drawBackdrop(W, kind) {
     const { ctx, w, h } = this;
     const L = this.layers || {};
     const g = ctx.createLinearGradient(0, 0, 0, h);
@@ -139,6 +162,7 @@ export class Renderer {
       const s = Math.max(w / L.sky.width, (h * 0.75) / L.sky.height);
       ctx.drawImage(L.sky, (w - L.sky.width * s) / 2, 0, L.sky.width * s, L.sky.height * s);
     }
+    this.sky.drawBack(ctx, w, h, kind);
     const lift = clamp((this.camY - this.startY) * this.zoom, -h * 0.5, h * 0.5);
     this.layer(L.far, 0.04, 0.26, 0.66, lift * 0.15, W.wood[1]);
     this.layer(L.mid, 0.12, 0.38, 0.75, lift * 0.3, W.ground[1]);
@@ -296,27 +320,18 @@ export class Renderer {
         const spin = Math.abs(Math.cos(time * 3 + it.x / 80));
         const s = 30 * z;
         ctx.drawImage(this.coin, X - (s * spin) / 2, Y - s / 2, s * Math.max(spin, 0.12), s);
-      } else if (this.img.fuel) {
-        const s = 40 * z;
-        ctx.drawImage(this.img.fuel, X - s * 0.45, Y - s / 2, s * 0.9, s);
+      } else if (this.fuelImg) {
+        const s = 44 * z;
+        ctx.save();
+        ctx.translate(X, Y);
+        ctx.rotate(Math.sin(time * 2.5 + it.x) * 0.12);
+        ctx.globalAlpha = 0.35 + 0.15 * Math.sin(time * 5);
+        ctx.drawImage(this.glow, -s, -s, s * 2, s * 2);
+        ctx.globalAlpha = 1;
+        ctx.drawImage(this.fuelImg, -s / 2, -s / 2, s, s);
+        ctx.restore();
       }
     }
-  }
-
-  drawParticles(dt) {
-    const { ctx } = this;
-    const z = this.zoom;
-    for (let i = this.particles.length - 1; i >= 0; i--) {
-      const p = this.particles[i];
-      p.life -= dt;
-      if (p.life <= 0) { this.particles.splice(i, 1); continue; }
-      p.vy -= 700 * dt;
-      p.x += p.vx * dt; p.y += p.vy * dt;
-      ctx.globalAlpha = Math.min(1, p.life * 2);
-      ctx.fillStyle = p.color;
-      ctx.fillRect(this.sx(p.x) - (p.size * z) / 2, this.sy(p.y) - (p.size * z) / 2, p.size * z, p.size * z);
-    }
-    ctx.globalAlpha = 1;
   }
 
   /** Cart body art with the equipped paint baked in (cached per cart + paint). */
@@ -369,37 +384,67 @@ export class Renderer {
     return speed > 650 || cart.air ? 'excited' : 'calm';
   }
 
+  /** Trails and brake sparks, emitted from the train's current poses. */
+  emitFx(game, dt) {
+    const { cart, run } = game;
+    if (!cart || run.over || dt <= 0) return;
+    const poses = this.carPoses(game);
+    const last = poses[poses.length - 1];
+    const speed = cart.air ? Math.hypot(cart.vx, cart.vy) : Math.abs(cart.v);
+    const cos = Math.cos(last.angle), sin = Math.sin(last.angle);
+    const rearX = last.x - cos * CAR_LEN * 0.55, rearY = last.y + 36 - sin * CAR_LEN * 0.55;
+    const vx = cart.air ? cart.vx : cart.v * cos, vy = cart.air ? cart.vy : cart.v * sin;
+    const trail = game.save.cosmetics.equipped.trail;
+    if (trail !== 'none' && (speed > 520 || run.boostGlow > 0) && !this.low) emitTrail(this.particles, trail, rearX, rearY, vx, vy, game.time);
+    if (!cart.air && game.input.last?.brake > 0 && speed > 260) {
+      for (const p of poses) emitSparks(this.particles, p.x + Math.cos(p.angle) * CAR_LEN * 0.3, p.y + 12, cart.v, this.low ? 1 : 2);
+    }
+  }
+
   drawTrain(game) {
-    const { ctx, img } = this;
-    const z = this.zoom;
+    const { img } = this;
     const c = game.cart;
     const eq = game.save.cosmetics.equipped;
     const body = this.body(game.cartId, eq.paint);
-    const wheel = img[`wheel_${eq.wheel}`] || img.wheel_classic;
-    const trail = eq.trail !== 'none' ? img[`trail_${eq.trail}`] : null;
     const poses = this.carPoses(game);
     const speed = c.air ? Math.hypot(c.vx, c.vy) : Math.abs(c.v);
-    const bounce = c.air ? 0 : Math.sin(game.time * 18) * Math.min(speed / 900, 1) * 1.5 * z;
+    const bounce = c.air ? 0 : Math.sin(game.time * 18) * Math.min(speed / 900, 1) * 1.5 * this.zoom;
 
-    if (trail && speed > 600 && !game.run.over) {
+    // Boost flame out of the back of the train while a booster or boost power-up is active.
+    if (game.run.boostGlow > 0 && !game.run.over) {
       const last = poses[poses.length - 1];
-      const tw = 170 * z, th = (tw * trail.height) / trail.width;
+      const ctx = this.ctx;
       ctx.save();
       ctx.translate(this.sx(last.x), this.sy(last.y));
       ctx.rotate(-last.angle);
-      ctx.globalAlpha = clamp((speed - 600) / 400, 0.3, 0.9);
-      ctx.drawImage(trail, -CAR_LEN * 0.5 * z - tw, -38 * z - th / 2, tw, th);
+      ctx.translate(-CAR_LEN * 0.5 * this.zoom, -32 * this.zoom);
+      drawFlame(ctx, 90 * this.zoom, game.time, Math.min(1, game.run.boostGlow * 1.5));
       ctx.restore();
     }
 
     for (let k = poses.length - 1; k >= 0; k--) {
       const p = poses[k];
       const rider = k === 0 ? img[`dave_${this.daveFace(game)}`] : img[`rider_${this.riders[(k - 1) % this.riders.length]}`];
-      this.drawCar(p, body, wheel, rider, k === 0, k < poses.length - 1, bounce, game.cart.wheel);
+      this.drawCar(p, body, eq.wheel, rider, k === 0, k < poses.length - 1, bounce, c.wheel);
     }
   }
 
-  drawCar(p, body, wheel, rider, lead, coupler, bounce, spin) {
+  drawSpeedLines(game) {
+    const c = game.cart;
+    const speed = c.air ? Math.hypot(c.vx, c.vy) : Math.abs(c.v);
+    if (speed < 1050 || game.run.over || this.low) return;
+    const { ctx, w, h } = this;
+    const k = Math.min(1, (speed - 1050) / 500);
+    ctx.strokeStyle = `rgba(255,255,255,${0.25 * k})`;
+    ctx.lineWidth = 2;
+    for (let i = 0; i < 14; i++) {
+      const y = (i * 97 + game.time * 40) % h;
+      const x = w - ((game.time * 1800 + i * 211) % (w * 1.4));
+      ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + 80 + 120 * k, y); ctx.stroke();
+    }
+  }
+
+  drawCar(p, body, wheelSkin, rider, lead, coupler, bounce, spin) {
     const { ctx } = this;
     const z = this.zoom;
     const bw = CAR_LEN * z;
@@ -448,9 +493,7 @@ export class Renderer {
     for (const wx of [-bw * 0.3, bw * 0.3]) {
       ctx.save();
       ctx.translate(wx, axle);
-      ctx.rotate(-spin);
-      if (wheel) ctx.drawImage(wheel, -r, -r, r * 2, r * 2);
-      else { ctx.fillStyle = '#222'; ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI * 2); ctx.fill(); }
+      drawWheel(ctx, r, -spin, wheelSkin);
       ctx.restore();
     }
     ctx.restore();
@@ -458,16 +501,6 @@ export class Renderer {
 }
 
 export const RENDER_IMAGES = {
-  wheel_classic: '/assets/carts/coaster-wheel.webp',
-  wheel_gold: '/assets/wheels/gold.webp',
-  wheel_neon: '/assets/wheels/neon.webp',
-  wheel_wood: '/assets/wheels/wood.webp',
-  wheel_spiked: '/assets/wheels/spiked.webp',
-  trail_fire: '/assets/trails/fire.webp',
-  trail_ice: '/assets/trails/ice.webp',
-  trail_rainbow: '/assets/trails/rainbow.webp',
-  trail_electric: '/assets/trails/electric.webp',
-  fuel: '/assets/ui/fuel.webp',
   dave_calm: '/assets/riders/dave-calm.webp',
   dave_excited: '/assets/riders/dave-excited.webp',
   dave_terrified: '/assets/riders/dave-terrified.webp',

@@ -29,7 +29,7 @@ export function startRun(game, opts = {}) {
   game.run = {
     coins: 0, boosts: 0, airtime: 0, cleanLandings: 0, fuelCans: 0, derailed: false,
     stall: 0, over: false, overTimer: 0, danger: 0, maxX: 200,
-    magnet: 0, shieldUsed: false,
+    magnet: 0, shieldUsed: false, boostGlow: 0,
   };
   game.time = 0;
   game.acc = 0;
@@ -60,6 +60,9 @@ export function useBoost(game) {
   if (cart.air) { cart.vx = Math.max(cart.vx, PHYS.boostSpeed); } else { cart.v = Math.max(cart.v, PHYS.boostSpeed * 1.1); }
   run.boosts += 1;
   game.renderer.burst(cart.x, cart.y + 20, '#42a5ef', 18, 340);
+  run.boostGlow = 1.4;
+  game.renderer.addShake(8);
+  game.sound.play('boost');
   game.say(pick(QUIPS.boost), true);
 }
 
@@ -69,6 +72,7 @@ export function useMagnet(game) {
   save.inventory.magnet -= 1;
   game.persist();
   run.magnet = MAGNET_SECONDS;
+  game.sound.play('shield');
   game.say('Magnet on. Coins are legally obliged to come to you.', true);
 }
 
@@ -100,10 +104,12 @@ export function updateRun(game, dt) {
   }
   run.maxX = Math.max(run.maxX, cart.x);
   run.magnet = Math.max(0, run.magnet - dt);
+  run.boostGlow = Math.max(0, run.boostGlow - dt);
 
   collect(game);
 
   const speed = cart.air ? Math.hypot(cart.vx, cart.vy) : cart.v;
+  game.sound.updateRun(Math.abs(speed), cart.air, dt);
   run.danger = cart.air ? 1 : Math.min(1.2, liftRatio(track, cart.x, Math.max(0, speed)));
   if (!cart.air && run.danger > 0.85) game.say(pick(QUIPS.danger));
   if (cart.fuel / stats.tank < 0.2 && cart.fuel > 0) game.say(pick(QUIPS.lowFuel));
@@ -116,6 +122,8 @@ export function updateRun(game, dt) {
       game.persist();
       rescue(cart, track);
       game.flash = 0.5;
+      game.renderer.addShake(12);
+      game.sound.play('shield');
       game.renderer.burst(cart.x, cart.y + 30, '#9be3ff', 22, 300);
       game.say('Shield absorbed that. Karen filed the report anyway.', true);
       return false;
@@ -143,10 +151,13 @@ function collect(game) {
     it.taken = true;
     if (it.kind === 'coin') {
       run.coins += 1;
+      game.sound.play('coin');
+      game.hudPulse('coins');
       renderer.burst(it.x, it.y, '#ffd23f', 5, 160);
     } else {
       cart.fuel = stats.tank;
       run.fuelCans += 1;
+      game.sound.play('fuel');
       renderer.burst(it.x, it.y, '#72c95a', 12, 220);
       game.say(pick(QUIPS.fuel), true);
     }
@@ -155,16 +166,27 @@ function collect(game) {
 
 function onEvent(game, ev) {
   const { cart, renderer, run } = game;
-  if (ev === 'airborne') game.say(pick(QUIPS.airborne));
+  if (ev === 'airborne') {
+    game.sound.play('air');
+    game.say(pick(QUIPS.airborne));
+  }
   if (ev === 'boost') {
     run.boosts += 1;
+    run.boostGlow = 1.2;
+    renderer.addShake(6);
+    game.sound.play('boost');
     renderer.burst(cart.x, cart.y + 20, '#ffb62e', 14, 300);
     game.say(pick(QUIPS.boost));
   }
-  if (ev === 'landed' || ev === 'landed-clean') renderer.burst(cart.x, cart.y + 5, '#c9a27a', 10, 200);
+  if (ev === 'landed' || ev === 'landed-clean') {
+    renderer.burst(cart.x, cart.y + 5, '#c9a27a', 10, 200);
+    renderer.addShake(Math.min(14, 3 + cart.airTime * 6));
+    game.sound.play('land');
+  }
   if (ev === 'landed-clean') {
     run.coins += 5;
     run.cleanLandings += 1;
+    game.sound.play('clean');
     game.say(pick(QUIPS.landing), true);
   }
 }
@@ -177,6 +199,8 @@ function endRun(game, reason) {
   if (run.derailed) {
     game.flash = 0.8;
     renderer.burst(cart.x, cart.y + 20, '#ff6b3d', 26, 420);
+    renderer.addShake(20);
+    game.sound.play('crash');
     if (!cart.air) { cart.vx = cart.v; cart.vy = 300; }
     game.vibrate(250);
   }

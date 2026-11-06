@@ -4,6 +4,12 @@ Every image in the game today was sliced from 1536Ã—1024 composite sheets, so al
 **1.6Ã— to 14Ã— below the resolution they need** (run `python tools/art/asset_report.py` for the live
 list). Upscaling can't recover detail that small, so the fix is to **regenerate each asset on its own**.
 
+**Already done in code, so don't generate these:** every UI icon (coin, gem, fuel, boost, shield,
+magnet, hourglass, trophy, medals, stars, lock, gift, mission icons, timer, settings icons), avatar
+frames, the display plinth, the results ribbon, coaster wheels and wheel skins, boost trails, the
+boost flame, sparks, fireworks, clouds and weather. They live in `src/ui/icons.js` and
+`src/game/systems/fx.js` and are sharp at any size.
+
 ## How to deliver
 
 1. **One asset per request.** Start every prompt with: *"Generate ONLY this one image. Do not make a
@@ -84,21 +90,18 @@ nozzle Â· `carts/golden` gold plating, crown ornament Â· `carts/dragon` red-oran
 bob and a megaphone Â· `riders/cryptobro` hoodie, gold chain, laser-eye glow Â· `riders/influencer`
 filming on a phone, peace sign Â· `riders/grandma` knitting, unbothered Â· `riders/goose` angry goose in a tiny helmet.
 
-`carts/coaster-wheel` (256Ã—256): coaster wheel, exact side view, dark polyurethane tyre, red hub with 6 bolts.
 
 ## Tier 3: menus and cards (2â€“5Ã— too small)
 
 `ui/logo` 2048Ã—1024 transparent (check every letter) Â· `hub/adventure|events|multiplayer|challenge`
 800Ã—1000 painted cards Â· `cards/park|night|mountain|desert|snow|volcano` 640Ã—400 painted thumbnails
-Â· `ui/plinth` 1024Ã—512 Â· `ui/ribbon` 1536Ã—384 Â· `ui/stars` 768Ã—256 (gold, grey, gold-sparkle in a row)
-Â· `trails/fire|ice|rainbow|electric` 1024Ã—256 Â· `wheels/gold|neon|wood|spiked` 256Ã—256 Â·
-`avatars/*` 512Ã—512 round portraits and frames.
+Â· `avatars/dave|karen9000|cryptobro|influencer|grandma|goose` 512Ã—512 round portraits (no frame;
+frames are code) Â· `event/reward` 512Ã—512 neon cart on a pedestal.
 
-## Tier 4: icons (2â€“3Ã— too small, least visible)
+## Tier 4: illustrated items (least visible)
 
-256Ã—256 transparent each: `ui/gem`, `ui/fuel`, `ui/boost`, `ui/shield`, `ui/magnet`,
-`ui/hourglass`, `ui/trophy`, `ui/medal-1|2|3`, `shop/*`, `rewards/*`, `missions/*`, `event/timer`,
-`event/reward`.
+512Ã—512 transparent each: `shop/coin-pile`, `shop/coin-sack`, `shop/coin-chest`, `shop/skin-bundle`,
+`rewards/day7-cart` (the Golden Cart on a small pedestal).
 
 ---
 
@@ -106,107 +109,70 @@ filming on a phone, peace sign Â· `riders/grandma` knitting, unbothered Â· `ride
 
 | File | Now | Target | Short by | Use |
 | --- | --- | --- | --- | --- |
-| `bg/mountain-sky.webp` | 276×76 | 1920×1080 | 14.2× | full-screen sky |
-| `bg/mountain-near.webp` | 279×76 | 3840×1080 | 14.2× | parallax layer, tiles horizontally |
-| `bg/mountain-mid.webp` | 280×76 | 3840×1080 | 14.2× | parallax layer, tiles horizontally |
-| `bg/mountain-far.webp` | 279×76 | 3840×1080 | 14.2× | parallax layer, tiles horizontally |
-| `bg/volcano-sky.webp` | 276×77 | 1920×1080 | 14.0× | full-screen sky |
-| `bg/volcano-near.webp` | 279×77 | 3840×1080 | 14.0× | parallax layer, tiles horizontally |
-| `bg/volcano-mid.webp` | 280×77 | 3840×1080 | 14.0× | parallax layer, tiles horizontally |
-| `bg/volcano-far.webp` | 279×77 | 3840×1080 | 14.0× | parallax layer, tiles horizontally |
-| `bg/snow-sky.webp` | 276×77 | 1920×1080 | 14.0× | full-screen sky |
-| `bg/snow-near.webp` | 279×77 | 3840×1080 | 14.0× | parallax layer, tiles horizontally |
-| `bg/snow-mid.webp` | 280×77 | 3840×1080 | 14.0× | parallax layer, tiles horizontally |
-| `bg/snow-far.webp` | 279×77 | 3840×1080 | 14.0× | parallax layer, tiles horizontally |
-| `bg/night-sky.webp` | 276×77 | 1920×1080 | 14.0× | full-screen sky |
-| `bg/night-near.webp` | 279×77 | 3840×1080 | 14.0× | parallax layer, tiles horizontally |
-| `bg/night-mid.webp` | 280×77 | 3840×1080 | 14.0× | parallax layer, tiles horizontally |
-| `bg/night-far.webp` | 279×77 | 3840×1080 | 14.0× | parallax layer, tiles horizontally |
-| `bg/desert-sky.webp` | 276×77 | 1920×1080 | 14.0× | full-screen sky |
-| `bg/desert-near.webp` | 279×77 | 3840×1080 | 14.0× | parallax layer, tiles horizontally |
-| `bg/desert-mid.webp` | 280×77 | 3840×1080 | 14.0× | parallax layer, tiles horizontally |
-| `bg/desert-far.webp` | 279×77 | 3840×1080 | 14.0× | parallax layer, tiles horizontally |
-| `trails/ice.webp` | 86×38 | 1024×256 | 11.9× | boost trail |
-| `trails/fire.webp` | 87×38 | 1024×256 | 11.8× | boost trail |
-| `trails/rainbow.webp` | 95×40 | 1024×256 | 10.8× | boost trail |
-| `trails/electric.webp` | 95×37 | 1024×256 | 10.8× | boost trail |
-| `bg/park-near.webp` | 1077×112 | 3840×1080 | 9.6× | parallax layer, tiles horizontally |
-| `bg/park-far.webp` | 1077×134 | 3840×1080 | 8.1× | parallax layer, tiles horizontally |
-| `bg/park-sky.webp` | 1071×163 | 1920×1080 | 6.6× | full-screen sky |
-| `bg/park-mid.webp` | 1077×174 | 3840×1080 | 6.2× | parallax layer, tiles horizontally |
-| `bg/menu.webp` | 520×218 | 1920×1080 | 5.0× | full-screen backdrop |
-| `bg/loading.webp` | 476×218 | 1920×1080 | 5.0× | full-screen backdrop |
-| `bg/garage.webp` | 501×218 | 1920×1080 | 5.0× | full-screen backdrop |
-| `wheels/wood.webp` | 60×55 | 256×256 | 4.7× | wheel skin |
-| `wheels/neon.webp` | 57×55 | 256×256 | 4.7× | wheel skin |
-| `bg/splash.webp` | 666×238 | 1920×1080 | 4.5× | full-screen backdrop |
-| `wheels/spiked.webp` | 62×57 | 256×256 | 4.5× | wheel skin |
-| `ui/logo.webp` | 507×233 | 2048×1024 | 4.4× | logo |
-| `riders/dave-calm.webp` | 117×147 | 512×512 | 4.4× | seated rider |
-| `wheels/gold.webp` | 60×59 | 256×256 | 4.3× | wheel skin |
-| `ui/plinth.webp` | 395×122 | 1024×512 | 4.2× | display platform |
-| `riders/dave-excited.webp` | 123×148 | 512×512 | 4.2× | seated rider |
-| `event/banner.webp` | 904×197 | 1920×800 | 4.1× | full-screen event backdrop |
-| `riders/dave-terrified.webp` | 128×147 | 512×512 | 4.0× | seated rider |
-| `riders/dave-dizzy.webp` | 128×152 | 512×512 | 4.0× | seated rider |
-| `carts/golden.webp` | 266×170 | 1024×512 | 3.8× | cart body |
-| `avatars/frame-silver.webp` | 135×146 | 512×512 | 3.8× | portrait / frame |
-| `avatars/frame-gold.webp` | 136×162 | 512×512 | 3.8× | portrait / frame |
-| `carts/wooden.webp` | 276×154 | 1024×512 | 3.7× | cart body |
-| `avatars/frame-bronze.webp` | 140×142 | 512×512 | 3.7× | portrait / frame |
-| `carts/steel.webp` | 286×152 | 1024×512 | 3.6× | cart body |
-| `carts/rocket.webp` | 290×151 | 1024×512 | 3.5× | cart body |
-| `avatars/frame-legendary.webp` | 149×165 | 512×512 | 3.4× | portrait / frame |
-| `avatars/dave.webp` | 154×168 | 512×512 | 3.3× | portrait / frame |
-| `carts/dragon.webp` | 309×190 | 1024×512 | 3.3× | cart body |
-| `avatars/grandma.webp` | 155×159 | 512×512 | 3.3× | portrait / frame |
-| `avatars/cryptobro.webp` | 156×166 | 512×512 | 3.3× | portrait / frame |
-| `avatars/karen9000.webp` | 157×160 | 512×512 | 3.3× | portrait / frame |
-| `avatars/influencer.webp` | 158×165 | 512×512 | 3.2× | portrait / frame |
-| `avatars/goose.webp` | 159×159 | 512×512 | 3.2× | portrait / frame |
-| `ui/boost.webp` | 81×114 | 256×256 | 3.2× | icon |
-| `missions/crash.webp` | 91×81 | 256×256 | 3.2× | icon |
-| `ui/ribbon.webp` | 560×124 | 1536×384 | 3.1× | results ribbon |
-| `shop/coin-pile.webp` | 83×86 | 256×256 | 3.1× | icon |
-| `riders/karen9000.webp` | 197×168 | 512×512 | 3.0× | seated rider |
-| `missions/stunt.webp` | 86×84 | 256×256 | 3.0× | icon |
-| `shop/gem-pile.webp` | 88×85 | 256×256 | 3.0× | icon |
-| `shop/coin-sack.webp` | 85×86 | 256×256 | 3.0× | icon |
-| `shop/coin-doubler.webp` | 89×85 | 256×256 | 3.0× | icon |
-| `shop/skin-bundle.webp` | 113×86 | 256×256 | 3.0× | icon |
-| `shop/gem-chest.webp` | 89×86 | 256×256 | 3.0× | icon |
-| `shop/coin-chest.webp` | 86×86 | 256×256 | 3.0× | icon |
-| `shop/boost-refill.webp` | 87×86 | 256×256 | 3.0× | icon |
-| `riders/grandma.webp` | 175×172 | 512×512 | 3.0× | seated rider |
-| `rewards/gift-box.webp` | 92×86 | 256×256 | 3.0× | icon |
-| `rewards/day7-cart.webp` | 101×86 | 256×256 | 3.0× | icon |
-| `missions/distance.webp` | 95×86 | 256×256 | 3.0× | icon |
-| `missions/coins.webp` | 88×86 | 256×256 | 3.0× | icon |
-| `missions/boost.webp` | 88×86 | 256×256 | 3.0× | icon |
-| `riders/cryptobro.webp` | 173×176 | 512×512 | 3.0× | seated rider |
-| `riders/goose.webp` | 176×179 | 512×512 | 2.9× | seated rider |
-| `riders/influencer.webp` | 185×177 | 512×512 | 2.9× | seated rider |
-| `ui/gem.webp` | 109×91 | 256×256 | 2.8× | icon |
-| `cards/volcano.webp` | 241×144 | 640×400 | 2.8× | level-select card |
-| `cards/snow.webp` | 240×144 | 640×400 | 2.8× | level-select card |
-| `cards/park.webp` | 251×144 | 640×400 | 2.8× | level-select card |
-| `cards/night.webp` | 250×144 | 640×400 | 2.8× | level-select card |
-| `cards/mountain.webp` | 243×144 | 640×400 | 2.8× | level-select card |
-| `cards/desert.webp` | 243×144 | 640×400 | 2.8× | level-select card |
-| `ui/hourglass.webp` | 93×118 | 256×256 | 2.8× | icon |
-| `carts/basic.webp` | 442×186 | 1024×512 | 2.8× | cart body |
-| `hub/challenge.webp` | 301×364 | 800×1000 | 2.7× | hub card |
-| `hub/multiplayer.webp` | 314×366 | 800×1000 | 2.7× | hub card |
-| `hub/events.webp` | 304×366 | 800×1000 | 2.7× | hub card |
-| `hub/adventure.webp` | 312×366 | 800×1000 | 2.7× | hub card |
-| `ui/shield.webp` | 97×107 | 256×256 | 2.6× | icon |
-| `ui/fuel.webp` | 99×106 | 256×256 | 2.6× | icon |
-| `ui/magnet.webp` | 109×127 | 256×256 | 2.3× | icon |
-| `ui/medal-3.webp` | 116×158 | 256×256 | 2.2× | icon |
-| `ui/medal-2.webp` | 119×159 | 256×256 | 2.2× | icon |
-| `ui/medal-1.webp` | 121×160 | 256×256 | 2.1× | icon |
-| `ui/stars.webp` | 417×130 | 768×256 | 2.0× | star states |
-| `ui/trophy.webp` | 137×158 | 256×256 | 1.9× | icon |
-| `carts/coaster-wheel.webp` | 152×153 | 256×256 | 1.7× | wheel |
-| `event/timer.webp` | 154×174 | 256×256 | 1.7× | icon |
-| `event/reward.webp` | 227×161 | 256×256 | 1.6× | icon |
+| `bg/mountain-sky.webp` | 276Ã—76 | 1920Ã—1080 | 14.2Ã— | full-screen sky |
+| `bg/mountain-near.webp` | 279Ã—76 | 3840Ã—1080 | 14.2Ã— | parallax layer, tiles horizontally |
+| `bg/mountain-mid.webp` | 280Ã—76 | 3840Ã—1080 | 14.2Ã— | parallax layer, tiles horizontally |
+| `bg/mountain-far.webp` | 279Ã—76 | 3840Ã—1080 | 14.2Ã— | parallax layer, tiles horizontally |
+| `bg/volcano-sky.webp` | 276Ã—77 | 1920Ã—1080 | 14.0Ã— | full-screen sky |
+| `bg/volcano-near.webp` | 279Ã—77 | 3840Ã—1080 | 14.0Ã— | parallax layer, tiles horizontally |
+| `bg/volcano-mid.webp` | 280Ã—77 | 3840Ã—1080 | 14.0Ã— | parallax layer, tiles horizontally |
+| `bg/volcano-far.webp` | 279Ã—77 | 3840Ã—1080 | 14.0Ã— | parallax layer, tiles horizontally |
+| `bg/snow-sky.webp` | 276Ã—77 | 1920Ã—1080 | 14.0Ã— | full-screen sky |
+| `bg/snow-near.webp` | 279Ã—77 | 3840Ã—1080 | 14.0Ã— | parallax layer, tiles horizontally |
+| `bg/snow-mid.webp` | 280Ã—77 | 3840Ã—1080 | 14.0Ã— | parallax layer, tiles horizontally |
+| `bg/snow-far.webp` | 279Ã—77 | 3840Ã—1080 | 14.0Ã— | parallax layer, tiles horizontally |
+| `bg/night-sky.webp` | 276Ã—77 | 1920Ã—1080 | 14.0Ã— | full-screen sky |
+| `bg/night-near.webp` | 279Ã—77 | 3840Ã—1080 | 14.0Ã— | parallax layer, tiles horizontally |
+| `bg/night-mid.webp` | 280Ã—77 | 3840Ã—1080 | 14.0Ã— | parallax layer, tiles horizontally |
+| `bg/night-far.webp` | 279Ã—77 | 3840Ã—1080 | 14.0Ã— | parallax layer, tiles horizontally |
+| `bg/desert-sky.webp` | 276Ã—77 | 1920Ã—1080 | 14.0Ã— | full-screen sky |
+| `bg/desert-near.webp` | 279Ã—77 | 3840Ã—1080 | 14.0Ã— | parallax layer, tiles horizontally |
+| `bg/desert-mid.webp` | 280Ã—77 | 3840Ã—1080 | 14.0Ã— | parallax layer, tiles horizontally |
+| `bg/desert-far.webp` | 279Ã—77 | 3840Ã—1080 | 14.0Ã— | parallax layer, tiles horizontally |
+| `bg/park-near.webp` | 1077Ã—112 | 3840Ã—1080 | 9.6Ã— | parallax layer, tiles horizontally |
+| `bg/park-far.webp` | 1077Ã—134 | 3840Ã—1080 | 8.1Ã— | parallax layer, tiles horizontally |
+| `bg/park-sky.webp` | 1071Ã—163 | 1920Ã—1080 | 6.6Ã— | full-screen sky |
+| `bg/park-mid.webp` | 1077Ã—174 | 3840Ã—1080 | 6.2Ã— | parallax layer, tiles horizontally |
+| `bg/menu.webp` | 520Ã—218 | 1920Ã—1080 | 5.0Ã— | full-screen backdrop |
+| `bg/loading.webp` | 476Ã—218 | 1920Ã—1080 | 5.0Ã— | full-screen backdrop |
+| `bg/garage.webp` | 501Ã—218 | 1920Ã—1080 | 5.0Ã— | full-screen backdrop |
+| `bg/splash.webp` | 666Ã—238 | 1920Ã—1080 | 4.5Ã— | full-screen backdrop |
+| `ui/logo.webp` | 507Ã—233 | 2048Ã—1024 | 4.4Ã— | logo |
+| `riders/dave-calm.webp` | 117Ã—147 | 512Ã—512 | 4.4Ã— | seated rider |
+| `riders/dave-excited.webp` | 123Ã—148 | 512Ã—512 | 4.2Ã— | seated rider |
+| `event/banner.webp` | 904Ã—197 | 1920Ã—800 | 4.1Ã— | full-screen event backdrop |
+| `riders/dave-terrified.webp` | 128Ã—147 | 512Ã—512 | 4.0Ã— | seated rider |
+| `riders/dave-dizzy.webp` | 128Ã—152 | 512Ã—512 | 4.0Ã— | seated rider |
+| `carts/golden.webp` | 266Ã—170 | 1024Ã—512 | 3.8Ã— | cart body |
+| `carts/wooden.webp` | 276Ã—154 | 1024Ã—512 | 3.7Ã— | cart body |
+| `carts/steel.webp` | 286Ã—152 | 1024Ã—512 | 3.6Ã— | cart body |
+| `carts/rocket.webp` | 290Ã—151 | 1024Ã—512 | 3.5Ã— | cart body |
+| `avatars/dave.webp` | 154Ã—168 | 512Ã—512 | 3.3Ã— | portrait / frame |
+| `carts/dragon.webp` | 309Ã—190 | 1024Ã—512 | 3.3Ã— | cart body |
+| `avatars/grandma.webp` | 155Ã—159 | 512Ã—512 | 3.3Ã— | portrait / frame |
+| `avatars/cryptobro.webp` | 156Ã—166 | 512Ã—512 | 3.3Ã— | portrait / frame |
+| `avatars/karen9000.webp` | 157Ã—160 | 512Ã—512 | 3.3Ã— | portrait / frame |
+| `avatars/influencer.webp` | 158Ã—165 | 512Ã—512 | 3.2Ã— | portrait / frame |
+| `avatars/goose.webp` | 159Ã—159 | 512Ã—512 | 3.2Ã— | portrait / frame |
+| `shop/coin-pile.webp` | 83Ã—86 | 256Ã—256 | 3.1Ã— | icon |
+| `riders/karen9000.webp` | 197Ã—168 | 512Ã—512 | 3.0Ã— | seated rider |
+| `shop/coin-sack.webp` | 85Ã—86 | 256Ã—256 | 3.0Ã— | icon |
+| `shop/skin-bundle.webp` | 113Ã—86 | 256Ã—256 | 3.0Ã— | icon |
+| `shop/coin-chest.webp` | 86Ã—86 | 256Ã—256 | 3.0Ã— | icon |
+| `riders/grandma.webp` | 175Ã—172 | 512Ã—512 | 3.0Ã— | seated rider |
+| `rewards/day7-cart.webp` | 101Ã—86 | 256Ã—256 | 3.0Ã— | icon |
+| `riders/cryptobro.webp` | 173Ã—176 | 512Ã—512 | 3.0Ã— | seated rider |
+| `riders/goose.webp` | 176Ã—179 | 512Ã—512 | 2.9Ã— | seated rider |
+| `riders/influencer.webp` | 185Ã—177 | 512Ã—512 | 2.9Ã— | seated rider |
+| `cards/volcano.webp` | 241Ã—144 | 640Ã—400 | 2.8Ã— | level-select card |
+| `cards/snow.webp` | 240Ã—144 | 640Ã—400 | 2.8Ã— | level-select card |
+| `cards/park.webp` | 251Ã—144 | 640Ã—400 | 2.8Ã— | level-select card |
+| `cards/night.webp` | 250Ã—144 | 640Ã—400 | 2.8Ã— | level-select card |
+| `cards/mountain.webp` | 243Ã—144 | 640Ã—400 | 2.8Ã— | level-select card |
+| `cards/desert.webp` | 243Ã—144 | 640Ã—400 | 2.8Ã— | level-select card |
+| `carts/basic.webp` | 442Ã—186 | 1024Ã—512 | 2.8Ã— | cart body |
+| `hub/challenge.webp` | 301Ã—364 | 800Ã—1000 | 2.7Ã— | hub card |
+| `hub/multiplayer.webp` | 314Ã—366 | 800Ã—1000 | 2.7Ã— | hub card |
+| `hub/events.webp` | 304Ã—366 | 800Ã—1000 | 2.7Ã— | hub card |
+| `hub/adventure.webp` | 312Ã—366 | 800Ã—1000 | 2.7Ã— | hub card |
+| `event/reward.webp` | 227Ã—161 | 256Ã—256 | 1.6Ã— | icon |

@@ -27,6 +27,8 @@ the park's AI safety mascot, rides along and has opinions.
   in the **Shop**.
 - **Power-ups**: Boost (B) and Magnet (M) are buttons during a run; a Shield saves one bad landing
   automatically; a Coin Doubler doubles the next runs' coins.
+- **Sound**: procedural (no audio files): calliope music that speeds up with the cart, rail clacks,
+  wind, crashes and UI blips. Toggle music and effects in Settings.
 - **Worlds** unlock by best distance; the **Night Carnival** event fills from long runs there;
   **Challenge** is one seeded track per day.
 

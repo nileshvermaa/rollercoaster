@@ -1,12 +1,12 @@
 // Daily login calendar, the limited event, and the local leaderboard rivals.
 
 export const DAILY_REWARDS = [
-  { label: '1,000', img: 'shop/coin-pile.webp', grant: { coins: 1000 } },
-  { label: '50', img: 'ui/gem.webp', grant: { gems: 50 } },
-  { label: 'x3', img: 'ui/boost.webp', grant: { inventory: { boost: 3 } } },
+  { label: '1,000', icon: 'coins', grant: { coins: 1000 } },
+  { label: '50', icon: 'gem', grant: { gems: 50 } },
+  { label: 'x3', icon: 'boost', grant: { inventory: { boost: 3 } } },
   { label: '2,000', img: 'shop/coin-sack.webp', grant: { coins: 2000 } },
-  { label: '100', img: 'ui/gem.webp', grant: { gems: 100 } },
-  { label: 'x3', img: 'ui/magnet.webp', grant: { inventory: { magnet: 3 } } },
+  { label: '100', icon: 'gem', grant: { gems: 100 } },
+  { label: 'x3', icon: 'magnet', grant: { inventory: { magnet: 3 } } },
   { label: 'Golden Cart', img: 'rewards/day7-cart.webp', grant: { cart: 'golden', coinsIfOwned: 10000 }, big: true },
 ];
 

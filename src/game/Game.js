@@ -4,6 +4,8 @@
 
 import { $, toast } from './dom.js';
 import { Input } from '../engine/input.js';
+import { Sound } from '../engine/audio.js';
+import { hydrateIcons } from '../ui/icons.js';
 import { loadImages } from '../engine/assets.js';
 import { loadSave, writeSave } from './save.js';
 import { Renderer, RENDER_IMAGES } from './systems/render.js';
@@ -31,13 +33,16 @@ export class Game {
   constructor() {
     this.save = loadSave();
     this.input = new Input();
+    this.sound = new Sound();
     this.state = 'loading';
     this.history = [];
     this.lastQuipAt = -99;
     this.lastRunOpts = {};
 
+    hydrateIcons();
     this.fitStage();
     addEventListener('resize', () => this.fitStage());
+    this.bindSounds();
     this.input.bindPedal($('pedal-gas'), 'gas');
     this.input.bindPedal($('pedal-brake'), 'brake');
     this.bindNavigation();
@@ -121,7 +126,34 @@ export class Game {
   }
 
   applySettings() {
-    this.renderer?.setQuality(this.save.settings.graphics === 'low');
+    const s = this.save.settings;
+    this.renderer?.setQuality(s.graphics === 'low');
+    this.sound.setEnabled({ music: s.music, sfx: s.sfx });
+    document.body.classList.toggle('low-fx', s.graphics === 'low');
+  }
+
+  /** Button feel: hover tick, click blip, back blip, error buzz on disabled buttons. */
+  bindSounds() {
+    document.addEventListener('pointerover', (e) => {
+      const b = e.target.closest('button:not(:disabled), .set-row');
+      if (b && !b.contains(e.relatedTarget)) this.sound.play('hover');
+    });
+    document.addEventListener('click', (e) => {
+      const b = e.target.closest('button');
+      if (!b || b.classList.contains('pedal') || b.classList.contains('pu')) return;
+      this.sound.play(b.dataset.go === 'back' || b.classList.contains('back-btn') ? 'back' : 'click');
+    }, true);
+    // Disabled buttons swallow clicks; catch the press on their wrapper to buzz.
+    document.addEventListener('pointerdown', (e) => {
+      const b = document.elementsFromPoint(e.clientX, e.clientY).find((el) => el.matches?.('button:disabled'));
+      if (b) { this.sound.play('error'); b.classList.remove('nope'); void b.offsetWidth; b.classList.add('nope'); }
+    });
+  }
+
+  /** Briefly pop a HUD counter (coins collected, etc.). */
+  hudPulse(which) {
+    const el = $(which === 'coins' ? 'hud-coins' : which).closest('.chip');
+    el.classList.remove('pulse'); void el.offsetWidth; el.classList.add('pulse');
   }
 
   vibrate(ms) {
@@ -142,7 +174,10 @@ export class Game {
     for (const el of document.querySelectorAll('[data-bind]')) {
       const k = el.dataset.bind;
       if (k === 'xp') el.style.width = `${Math.round(lvl.frac * 100)}%`;
-      else if (k === 'frame') el.src = `/assets/avatars/frame-${frameFor(lvl.level)}.webp`;
+      else if (k === 'frame') {
+        const name = `frame-${frameFor(lvl.level)}`;
+        if (el.dataset.icon !== name) { el.dataset.icon = name; delete el.dataset.hydrated; hydrateIcons(el.parentElement); }
+      }
       else if (k in values) el.textContent = values[k];
     }
   }
@@ -162,8 +197,15 @@ export class Game {
     this.state = state;
     $('hud').classList.toggle('hidden', state !== 'play' && state !== 'pause');
     document.body.classList.toggle('playing', state === 'play');
-    for (const s of SCREENS) $(s).classList.toggle('show', s === state);
+    for (const s of SCREENS) {
+      const el = $(s);
+      const on = s === state;
+      if (on && !el.classList.contains('show')) { el.classList.remove('enter'); void el.offsetWidth; el.classList.add('enter'); }
+      el.classList.toggle('show', on);
+    }
+    this.sound.setMode(state === 'play' ? 'run' : state === 'pause' ? 'pause' : 'menu');
     this.refresh();
+    hydrateIcons();
   }
 
   back() {
@@ -207,6 +249,7 @@ export class Game {
     if (!force && t - this.lastQuipAt < 4) return;
     this.lastQuipAt = t;
     $('karen-text').textContent = text;
+    this.sound.play('karen');
     const el = $('karen');
     el.classList.remove('hidden');
     clearTimeout(this.quipTimer);

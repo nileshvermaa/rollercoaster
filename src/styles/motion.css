@@ -1,0 +1,149 @@
+/* Feel and motion: hover/press on everything you can touch, idle life on key elements, screen
+   entrances, the garage plinth and the results sequence. Honors reduced-motion and Low graphics. */
+
+/* ---- press & hover ---- */
+
+.btn, .back-btn, .icon-btn, .tab, .side-btn, .hub-card, .level-card, .car-thumb, .swatch, .opt,
+.shop-card, .pu, .pause-btn, .close-btn, .chev, .plus, .tap-start, .pedal, .lb-row, .mission, .day, .set-row {
+  transition: transform 0.14s cubic-bezier(.3, 1.6, .5, 1), filter 0.14s, box-shadow 0.14s, background-color 0.14s;
+  will-change: transform;
+}
+
+@media (hover: hover) {
+  .btn:hover:not(:disabled) { transform: translateY(-2px); filter: brightness(1.08) saturate(1.05); box-shadow: inset 0 3px 0 rgba(255,255,255,.5), inset 0 -5px 0 rgba(0,0,0,.22), 0 6px 0 var(--ink), 0 0 18px rgba(255, 230, 138, 0.35); }
+  .back-btn:hover, .icon-btn:hover, .close-btn:hover { transform: translateY(-2px) scale(1.06); filter: brightness(1.2); }
+  .back-btn:hover { transform: translateX(-2px) scale(1.06); }
+  .gear:hover .ico { transform: rotate(90deg); }
+  .tab:hover:not(.on) { transform: translateY(-2px); background: #3a3d6b; }
+  .side-btn:hover { transform: translateY(-2px) scale(1.06); filter: brightness(1.12); }
+  .side-btn:hover [data-icon] { animation: wiggle 0.5s ease-in-out; }
+  .hub-card:hover { transform: translateY(-6px) rotate(-0.6deg); box-shadow: 0 0 0 3px var(--ink), 0 14px 22px rgba(0,0,0,.45), 0 0 24px rgba(255,182,46,.45); }
+  .hub-card:hover img { transform: scale(1.06); }
+  .level-card:hover:not(.locked) { transform: translateY(-6px); box-shadow: 0 0 0 3px var(--ink), 0 12px 20px rgba(0,0,0,.45); }
+  .level-card:hover .pic img { transform: scale(1.08); }
+  .car-thumb:hover { transform: translateY(-4px); }
+  .swatch:hover, .opt:hover { transform: scale(1.1); }
+  .shop-card:hover { transform: translateY(-4px); box-shadow: 0 10px 18px rgba(0,0,0,.4); }
+  .shop-card:hover .ico, .shop-card:hover img { animation: bob 0.9s ease-in-out infinite; }
+  .pu:hover:not(:disabled), .pause-btn:hover { transform: scale(1.08); }
+  .chev:hover:not(:disabled) { transform: scale(1.25); color: var(--gold-hi); }
+  .lb-row:hover { transform: translateX(4px); }
+  .mission:hover { transform: translateX(3px); border-color: #6e63b7; }
+  .set-row:hover { background: #1e1d3a; }
+  .tap-start:hover { color: var(--gold-hi); }
+  .pedal:hover { filter: brightness(1.06); }
+}
+
+.btn:active:not(:disabled), .side-btn:active, .tab:active, .back-btn:active, .icon-btn:active, .swatch:active, .opt:active,
+.car-thumb:active, .pu:active, .pause-btn:active { transform: translateY(2px) scale(0.96); }
+.hub-card:active, .level-card:active:not(.locked) { transform: scale(0.97); }
+
+.hub-card img, .level-card .pic img { transition: transform 0.35s ease; }
+.gear .ico { transition: transform 0.4s ease; }
+
+/* Refused press: shake */
+.nope { animation: nope 0.35s ease; }
+@keyframes nope { 20% { transform: translateX(-6px); } 40% { transform: translateX(6px); } 60% { transform: translateX(-4px); } 80% { transform: translateX(3px); } }
+
+/* ---- idle life ---- */
+
+.menu-logo, .splash-logo { animation: float 3.2s ease-in-out infinite; }
+#title.enter .splash-logo { animation: drop-in 0.8s cubic-bezier(.3, 1.5, .5, 1) both, float 3.2s ease-in-out 0.8s infinite; }
+.menu-main .btn-yellow { animation: glow 1.8s ease-in-out infinite; }
+.badge { animation: bounce 1.6s ease-in-out infinite; }
+.notif { animation: pulse-ring 1.6s ease-out infinite; }
+.hub-card.selected, .level-card.selected { animation: sel-glow 1.8s ease-in-out infinite; }
+.day.today { animation: sel-glow 1.6s ease-in-out infinite; }
+.day.today .day-ico, .day.today img { animation: bob 1.2s ease-in-out infinite; }
+.claim:not(:disabled) { overflow: hidden; position: absolute; }
+.claim:not(:disabled)::after, .menu-main .btn-yellow::after {
+  content: ''; position: absolute; top: 0; left: -60%; width: 40%; height: 100%;
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.55), transparent);
+  animation: shine 2.6s ease-in-out infinite; pointer-events: none;
+}
+.menu-main .btn-yellow { position: relative; overflow: hidden; }
+.garage-cart, .cz-cart { animation: bob 2.4s ease-in-out infinite; }
+.event-reward img { animation: bob 2s ease-in-out infinite; }
+.event-timer .timer-hand { transform-origin: 50px 56px; animation: spin 4s linear infinite; }
+.lb-trophy, .lb-row.me .rank { animation: float 2.6s ease-in-out infinite; }
+.pu.active { animation: pulse-ring 1s ease-out infinite; }
+.chip.pulse { animation: pop 0.3s ease-out; }
+.load-pct { animation: blink-soft 1.2s ease-in-out infinite; }
+.bar.big i { background-image: linear-gradient(110deg, var(--gold-hi) 0%, var(--gold) 40%, #fff3a6 50%, var(--gold) 60%, var(--gold-hi) 100%); background-size: 200% 100%; animation: shimmer 1.2s linear infinite; }
+.new-best { color: var(--gold-hi); animation: pop 0.6s ease-out 1.2s both; }
+
+/* ---- the garage plinth (code-drawn, glowing, ring spinning) ---- */
+
+.plinth { position: absolute; left: 70px; top: 200px; width: 360px; height: 100px; }
+.plinth i { position: absolute; display: block; border-radius: 50%; }
+.plinth .pl-glow { left: -6%; right: -6%; top: 38%; bottom: -12%; background: radial-gradient(closest-side, rgba(66, 165, 239, 0.65), rgba(66, 165, 239, 0)); animation: blink-soft 2s ease-in-out infinite; }
+.plinth .pl-top {
+  left: 4%; right: 4%; top: 10%; height: 70%;
+  background: radial-gradient(ellipse at 50% 35%, #e9ecf2, #9aa1ae 45%, #4e5462 75%, #2a2c35);
+  border: 3px solid var(--ink); box-shadow: inset 0 -8px 0 #3a3d4a, 0 0 0 4px #42a5ef, 0 0 22px rgba(66, 165, 239, 0.8);
+}
+.plinth::before {
+  content: ''; position: absolute; left: 4%; right: 4%; top: 42%; height: 42%; border-radius: 0 0 50% 50% / 0 0 60% 60%;
+  background: linear-gradient(180deg, #6e7280, #2a2c35 60%, #15161d); border: 3px solid var(--ink); border-top: 0;
+  box-shadow: inset 0 -6px 0 rgba(66, 165, 239, 0.9), 0 10px 18px rgba(0, 0, 0, 0.5);
+}
+.plinth .pl-top { z-index: 1; }
+.plinth .pl-ring { z-index: 2; }
+.plinth .pl-ring { left: 50%; top: 45%; width: 62%; aspect-ratio: 1; border: 3px dashed rgba(155, 227, 255, 0.85); transform: translate(-50%, -50%) scaleY(0.24); animation: spin-flat 6s linear infinite; }
+.cz-plinth { left: 40px; top: 150px; width: 320px; height: 96px; }
+@keyframes spin-flat { from { transform: translate(-50%, -50%) scaleY(0.24) rotate(0deg); } to { transform: translate(-50%, -50%) scaleY(0.24) rotate(360deg); } }
+
+/* ---- screen entrances ---- */
+
+.screen.enter .stage { animation: stage-in 0.32s ease-out both; }
+.screen.enter .hub-card, .screen.enter .level-card, .screen.enter .shop-card, .screen.enter .day,
+.screen.enter .mission, .screen.enter .lb-row, .screen.enter .menu-main > *, .screen.enter .menu-side > *,
+.screen.enter .stat-card, .screen.enter .set-row {
+  animation: rise 0.42s cubic-bezier(.2, 1.3, .4, 1) both;
+  animation-delay: calc(var(--i, 0) * 55ms + 60ms);
+}
+.screen.enter .menu-main > :nth-child(1) { --i: 0; } .screen.enter .menu-main > :nth-child(2) { --i: 1; }
+.screen.enter .menu-main > :nth-child(3) { --i: 2; } .screen.enter .menu-main > :nth-child(4) { --i: 3; }
+.screen.enter .menu-side > :nth-child(2) { --i: 1; } .screen.enter .menu-side > :nth-child(3) { --i: 2; } .screen.enter .menu-side > :nth-child(4) { --i: 3; }
+.screen.enter .stat-card:nth-child(2) { --i: 1; } .screen.enter .stat-card:nth-child(3) { --i: 2; } .screen.enter .stat-card:nth-child(4) { --i: 3; }
+.screen.enter .hub-card:nth-child(2) { --i: 1; } .screen.enter .hub-card:nth-child(3) { --i: 2; } .screen.enter .hub-card:nth-child(4) { --i: 3; }
+.screen.enter .set-row:nth-of-type(2) { --i: 1; } .screen.enter .set-row:nth-of-type(3) { --i: 2; } .screen.enter .set-row:nth-of-type(4) { --i: 3; }
+.screen.enter .set-row:nth-of-type(5) { --i: 4; } .screen.enter .set-row:nth-of-type(6) { --i: 5; }
+.segs i.on { animation: seg-fill 0.3s ease-out both; animation-delay: calc(var(--i, 0) * 50ms); }
+
+/* Pause and results panels */
+#pause.enter .pause-panel { animation: pop-in 0.3s cubic-bezier(.3, 1.6, .5, 1) both; }
+#results.enter .results-panel { animation: pop-in 0.4s cubic-bezier(.3, 1.6, .5, 1) both; }
+#results.enter .ribbon { animation: drop-in 0.55s cubic-bezier(.3, 1.5, .5, 1) 0.15s both; }
+#results.enter .row-buttons { animation: rise 0.4s ease-out 1.6s both; }
+.star-on { animation: star-pop 0.5s cubic-bezier(.3, 1.8, .5, 1) both; }
+.star-bg { opacity: 0.85; }
+
+/* ---- keyframes ---- */
+
+@keyframes float { 50% { transform: translateY(-6px); } }
+@keyframes bob { 50% { transform: translateY(-4px); } }
+@keyframes wiggle { 25% { transform: rotate(-10deg); } 75% { transform: rotate(10deg); } }
+@keyframes glow { 50% { box-shadow: inset 0 3px 0 rgba(255,255,255,.7), inset 0 -6px 0 #c77000, 0 5px 0 var(--ink), 0 0 26px rgba(255, 182, 46, 0.75); } }
+@keyframes sel-glow { 50% { box-shadow: 0 0 0 3px var(--ink), 0 0 34px rgba(255, 182, 46, 0.85); } }
+@keyframes bounce { 0%, 60%, 100% { transform: translateY(0); } 30% { transform: translateY(-5px); } }
+@keyframes pulse-ring { 0% { box-shadow: 0 0 0 0 rgba(233, 87, 87, 0.7); } 100% { box-shadow: 0 0 0 12px rgba(233, 87, 87, 0); } }
+@keyframes shine { 0%, 55% { left: -60%; } 100% { left: 130%; } }
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes pop { 40% { transform: scale(1.18); } }
+@keyframes blink-soft { 50% { opacity: 0.65; } }
+@keyframes shimmer { to { background-position: -200% 0; } }
+@keyframes stage-in { from { opacity: 0; } }
+@keyframes rise { from { opacity: 0; transform: translateY(14px) scale(0.97); } }
+@keyframes pop-in { from { opacity: 0; transform: scale(0.8); } }
+@keyframes drop-in { from { opacity: 0; transform: translateY(-40px) scale(0.9); } }
+@keyframes star-pop { 0% { transform: scale(0) rotate(-40deg); opacity: 0; } 70% { transform: scale(1.25) rotate(8deg); opacity: 1; } 100% { transform: scale(1) rotate(0); } }
+@keyframes seg-fill { from { transform: scaleX(0.2); opacity: 0.3; } }
+
+/* ---- accessibility and Low graphics ---- */
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.001s !important; animation-iteration-count: 1 !important; transition-duration: 0.001s !important; }
+}
+body.low-fx .menu-logo, body.low-fx .splash-logo, body.low-fx .garage-cart, body.low-fx .cz-cart,
+body.low-fx .bar.big i, body.low-fx .plinth .pl-ring, body.low-fx .confetti i { animation: none; }

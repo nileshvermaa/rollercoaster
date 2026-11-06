@@ -71,6 +71,7 @@ export class Input {
       throttle = Math.max(0, t);
       brake = Math.max(0, -t);
     }
-    return { throttle, brake };
+    this.last = { throttle, brake };
+    return this.last;
   }
 }

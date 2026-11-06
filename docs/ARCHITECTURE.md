@@ -24,12 +24,14 @@ src/
       run.js           one run: world, fixed-step physics, pickups, power-ups, events, end of run
       render.js        canvas: world parallax, terrain, supports, lit rail, pickups, the 3-car train
       hud.js           DOM HUD: distance/progress, coins/gems, speed/fuel/derail gauges, power-ups
+      fx.js            code-drawn effects: wheel skins, particle trails, boost flame, sparks,
+                       fireworks, clouds and per-world weather
     screens/
       menus.js         main menu, home hub, level select
       garage.js        garage (stats, upgrades, carousel) and customize
       store.js         shop, events, daily rewards
       social.js        missions, leaderboard, profile, settings
-      results.js       run complete
+      results.js       run complete (ribbon drop, stars popping in, count-up)
   content/
     tuning.js          every physics and run number
     carts.js           the six carts, stats, upgrades and their prices
@@ -41,11 +43,17 @@ src/
     story.js           Karen-9000's lines and the end-of-run epitaphs
   world/
     track.js           PURE procedural track: rail spline, gaps, boosters, coins, fuel cans
+  ui/
+    icons.js           vector icon library (SVG): every UI icon, frames, medals, stars; also rasterised
+                       for canvas use, so nothing small depends on low-res art
   engine/
+    audio.js           procedural Web Audio: UI blips, gameplay SFX, rail clack and wind that follow
+                       speed, Karen's babble, an original calliope waltz that speeds up with the cart
     math.js            seeded RNG, clamp/lerp/damp, angle helpers
     input.js           keyboard + on-screen pedals + device tilt → { throttle, brake }
     assets.js          image loading that tolerates missing files
-  styles/              base (tokens, buttons, panels), screens, hud
+  styles/              base (tokens, buttons, panels), screens, hud, icons, motion (hover/press,
+                       idle animation, screen entrances; honours reduced-motion and Low graphics)
 ```
 
 ## The frame
@@ -81,6 +89,13 @@ seed as the cart approaches. Rules that keep it fair, each covered by a test:
   a conservative launch at booster speed would fly. `tests/physics.test.js` drives a hands-off cart
   over real generated gaps.
 - Items are kept sorted by x so lookups are a binary search (`firstItemAt`).
+
+## Code first, images second
+
+Anything that is a shape, an icon, a glow or a moving effect is drawn in code (`src/ui/icons.js`,
+`src/game/systems/fx.js`, CSS): it stays sharp at every size, can animate, and needs no art pass.
+Painted images are only for things code can't paint well: backgrounds, carts, characters, cards.
+`docs/ART_NEEDED.md` lists which images those are.
 
 ## Recipes
 

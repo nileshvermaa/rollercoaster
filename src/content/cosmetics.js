@@ -1,4 +1,5 @@
 // Customization: paint (a colour filter over the cart art), boost trails and wheel skins.
+// Trails and wheels are drawn in code (src/game/systems/fx.js), so they have no image files.
 // price in coins; source: 'shop' items unlock through the skin bundle, 'event' through the event.
 
 export const PAINTS = [
@@ -13,19 +14,19 @@ export const PAINTS = [
 ];
 
 export const TRAILS = [
-  { id: 'none', name: 'No trail', img: null, price: 0 },
-  { id: 'fire', name: 'Fire', img: 'trails/fire.webp', price: 1500 },
-  { id: 'ice', name: 'Ice', img: 'trails/ice.webp', price: 1500 },
-  { id: 'rainbow', name: 'Rainbow', img: 'trails/rainbow.webp', price: 2500 },
-  { id: 'electric', name: 'Electric', img: 'trails/electric.webp', price: 4000 },
+  { id: 'none', name: 'No trail', price: 0 },
+  { id: 'fire', name: 'Fire', price: 1500 },
+  { id: 'ice', name: 'Ice', price: 1500 },
+  { id: 'rainbow', name: 'Rainbow', price: 2500 },
+  { id: 'electric', name: 'Electric', price: 4000 },
 ];
 
 export const WHEELS = [
-  { id: 'classic', name: 'Classic', img: 'carts/coaster-wheel.webp', price: 0 },
-  { id: 'gold', name: 'Gold', img: 'wheels/gold.webp', price: 1000 },
-  { id: 'neon', name: 'Neon', img: 'wheels/neon.webp', price: 1000 },
-  { id: 'wood', name: 'Wood', img: 'wheels/wood.webp', price: 800 },
-  { id: 'spiked', name: 'Spiked', img: 'wheels/spiked.webp', price: 2000 },
+  { id: 'classic', name: 'Classic', price: 0 },
+  { id: 'gold', name: 'Gold', price: 1000 },
+  { id: 'neon', name: 'Neon', price: 1000 },
+  { id: 'wood', name: 'Wood', price: 800 },
+  { id: 'spiked', name: 'Spiked', price: 2000 },
 ];
 
 export const COSMETICS = { paint: PAINTS, trail: TRAILS, wheel: WHEELS };

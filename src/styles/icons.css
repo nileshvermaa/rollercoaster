@@ -1,0 +1,28 @@
+/* Sizing for the vector icons (src/ui/icons.js) wherever they sit. */
+
+.ico { display: block; width: 100%; height: 100%; overflow: visible; }
+[data-icon] { display: inline-block; flex: none; font-style: normal; }
+
+.chip [data-icon] { width: 22px; height: 22px; }
+.chip.small [data-icon] { width: 18px; height: 18px; }
+.side-btn [data-icon] { width: 28px; height: 28px; }
+.gear [data-icon] { width: 28px; height: 28px; }
+.pu [data-icon] { width: 100%; height: 100%; }
+.stats [data-icon] { width: 20px; height: 20px; }
+.event-timer [data-icon] { width: 36px; height: 36px; }
+.lb-trophy { width: 100px; height: 100px; }
+.set-row > [data-icon] { width: 26px; height: 26px; padding: 4px; border-radius: 8px; background: #3a3d63; }
+.avatar-sm .frame { position: absolute; left: -2px; top: -3px; width: 48px; height: 48px; }
+.avatar-lg .frame { position: absolute; left: -2px; top: 0; width: 124px; height: 124px; }
+
+.gem-i { display: inline-block; width: 16px; height: 16px; vertical-align: -3px; }
+.lock-ico { width: 44px; height: 46px; }
+.m-ico { width: 42px; height: 42px; flex: none; }
+.day-ico { width: 60px; height: 60px; }
+.item-ico { width: 62px; height: 58px; }
+.card-ico { width: 52px; height: 50px; }
+.medal { width: 36px; height: 44px; }
+.thumb-canvas { width: 100%; height: 100%; display: block; }
+
+.star-slot { position: relative; width: 66px; height: 66px; }
+.star-slot .ico { position: absolute; inset: 0; }

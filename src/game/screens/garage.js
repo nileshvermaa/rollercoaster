@@ -1,6 +1,7 @@
 // Garage (cart on the plinth, stats, upgrades, carousel) and Customize (paint, trail, wheels).
 
-import { $, h, img, fmt, toast } from '../dom.js';
+import { $, h, img, icon, fmt, toast } from '../dom.js';
+import { drawWheel, Particles, emitTrail } from '../systems/fx.js';
 import { CARTS, UPGRADES, cartById, cartStats, upgradeCost } from '../../content/carts.js';
 import { PAINTS, TRAILS, WHEELS, cosmeticById } from '../../content/cosmetics.js';
 import { buyCart, buyUpgrade, equipCosmetic } from '../progress.js';
@@ -10,7 +11,7 @@ const RARITY = { basic: 'STARTER', wooden: 'STABLE', steel: 'FAST', rocket: 'BOO
 // The cart the garage is showing (may be one you don't own yet).
 let viewing = null;
 
-const segs = (n, max = 5) => h('span', { className: 'segs' }, ...Array.from({ length: max }, (_, i) => h('i', { className: i < n ? 'on' : '' })));
+const segs = (n, max = 5) => h('span', { className: 'segs' }, ...Array.from({ length: max }, (_, i) => h('i', { className: i < n ? 'on' : '', style: `--i:${i}` })));
 
 /** Map raw stats onto 0..5 bars, relative to the range across all carts. */
 function bars(s) {
@@ -42,7 +43,7 @@ export function renderGarage(game) {
     actions = h('div', { className: 'row2' },
       h('button', {
         className: 'btn btn-yellow', disabled: save.coins < cart.price,
-        onclick: () => { if (buyCart(save, cart.id)) { game.persist(); toast(`${cart.name} is yours.`); game.refresh(); } },
+        onclick: () => { if (buyCart(save, cart.id)) { game.sound.play('buy'); game.persist(); toast(`${cart.name} is yours.`); game.refresh(); } },
       }, `Buy ● ${fmt(cart.price)}`));
   } else {
     const ups = Object.entries(UPGRADES).map(([key, u]) => {
@@ -53,7 +54,7 @@ export function renderGarage(game) {
         h('span', {}, u.label.replace('Rail clamps', 'Clamps').replace('Fuel tank', 'Tank')), segs(lvl, u.maxLevel),
         h('button', {
           className: 'btn btn-green btn-s', disabled: maxed || save.coins < cost || save.selected !== cart.id,
-          onclick: () => { if (buyUpgrade(save, key)) { game.persist(); game.refresh(); } },
+          onclick: () => { if (buyUpgrade(save, key)) { game.sound.play('buy'); game.persist(); game.refresh(); } },
         }, maxed ? 'MAX' : `● ${fmt(cost)}`));
     });
     actions = [
@@ -75,7 +76,7 @@ export function renderGarage(game) {
       return h('button', {
         className: `car-thumb${c.id === viewing ? ' on' : ''}${own ? '' : ' locked'}`, 'aria-label': c.name,
         onclick: () => { viewing = c.id; game.refresh(); },
-      }, img(c.img, ''), !own && h('span', { className: 'price' }, `● ${fmt(c.price)}`));
+      }, img(c.img, ''), !own && h('span', { className: 'price' }, icon('coin', 'gem-i'), ` ${fmt(c.price)}`));
     }),
   );
 }
@@ -99,10 +100,12 @@ export function bindCustomize(game) {
     const { save } = game;
     for (const kind of ['paint', 'trail', 'wheel']) {
       if (!equipCosmetic(save, kind, draft[kind])) {
+        game.sound.play('error');
         const item = cosmeticById(kind, draft[kind]);
         return toast(item.source ? `${item.name} comes from the ${item.source === 'event' ? 'event' : 'shop skin bundle'}.` : 'Not enough coins.');
       }
     }
+    game.sound.play('buy');
     game.persist();
     toast('Applied. Looking expensive.');
     game.refresh();
@@ -118,10 +121,7 @@ export function renderCustomize(game) {
   const cz = $('cz-cart');
   cz.src = `/assets/${cart.img}`;
   cz.style.filter = cosmeticFilter(save, draft.paint);
-  const trail = cosmeticById('trail', draft.trail);
-  const tr = $('cz-trail');
-  tr.classList.toggle('hidden', !trail.img);
-  if (trail.img) tr.src = `/assets/${trail.img}`;
+  startTrailPreview(game);
 
   const mark = (kind, item) =>
     owned[kind].includes(item.id) ? null : h('span', { className: 'locked-mark', 'aria-hidden': 'true' }, item.source ? '★' : '●');
@@ -136,11 +136,11 @@ export function renderCustomize(game) {
   $('cz-trails').replaceChildren(...TRAILS.map((t) => h('button', {
     className: `opt trail${draft.trail === t.id ? ' on' : ''}${owned.trail.includes(t.id) ? '' : ' unowned'}`, title: title('trail', t), 'aria-label': title('trail', t),
     onclick: pick('trail', t.id),
-  }, t.img ? img(t.img) : h('span', { className: 'none' }, 'None'), mark('trail', t))));
+  }, t.id === 'none' ? h('span', { className: 'none' }, 'None') : trailThumb(t.id), mark('trail', t))));
   $('cz-wheels').replaceChildren(...WHEELS.map((w) => h('button', {
     className: `opt wheel${draft.wheel === w.id ? ' on' : ''}${owned.wheel.includes(w.id) ? '' : ' unowned'}`, title: title('wheel', w), 'aria-label': title('wheel', w),
     onclick: pick('wheel', w.id),
-  }, img(w.img), mark('wheel', w))));
+  }, wheelThumb(w.id), mark('wheel', w))));
 
   const cost = ['paint', 'trail', 'wheel'].reduce((n, k) => {
     const item = cosmeticById(k, draft[k]);
@@ -151,4 +151,48 @@ export function renderCustomize(game) {
 
 export function resetCustomize() {
   draft = null;
+}
+
+// ---- code-drawn previews ----
+
+function wheelThumb(id) {
+  const c = h('canvas', { width: 96, height: 96, className: 'thumb-canvas' });
+  const g = c.getContext('2d');
+  g.translate(48, 48);
+  drawWheel(g, 40, -0.4, id);
+  return c;
+}
+
+function trailThumb(id) {
+  const c = h('canvas', { width: 136, height: 92, className: 'thumb-canvas' });
+  const g = c.getContext('2d');
+  const ps = new Particles();
+  // Simulate a short burst so the thumbnail shows the trail's shape and colours.
+  for (let f = 0; f < 30; f++) {
+    emitTrail(ps, id, 128, 0, 3600, 0, f / 30);
+    ps.update(1 / 45);
+  }
+  ps.draw(g, (x) => x, (y) => 46 - y, 1.1);
+  return c;
+}
+
+let previewRaf = 0;
+/** Animate the selected trail behind the preview cart while Customize is open. */
+function startTrailPreview(game) {
+  cancelAnimationFrame(previewRaf);
+  const canvas = $('cz-trail');
+  const g = canvas.getContext('2d');
+  const ps = new Particles();
+  let last = performance.now(), t = 0;
+  const tick = (now) => {
+    if (game.state !== 'customize') return;
+    const dt = Math.min((now - last) / 1000, 0.05);
+    last = now; t += dt;
+    if (draft.trail !== 'none') emitTrail(ps, draft.trail, 112, 0, 4200, 0, t);
+    ps.update(dt);
+    g.clearRect(0, 0, canvas.width, canvas.height);
+    ps.draw(g, (x) => x, (y) => 56 - y, 1);
+    previewRaf = requestAnimationFrame(tick);
+  };
+  previewRaf = requestAnimationFrame(tick);
 }
