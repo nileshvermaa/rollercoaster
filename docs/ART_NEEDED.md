@@ -1,144 +1,111 @@
-# HD art needed
+# HD art still needed
 
-Every image in the game today was sliced from 1536×1024 composite sheets, so all of them are
-**1.6× to 14× below the resolution they need** (run `python tools/art/asset_report.py` for the live
-list). Upscaling can't recover detail that small, so the fix is to **regenerate each asset on its own**.
-
-**Already done in code, so don't generate these:** every UI icon (coin, gem, fuel, boost, shield,
-magnet, hourglass, trophy, medals, stars, lock, gift, mission icons, timer, settings icons), avatar
-frames, the display plinth, the results ribbon, coaster wheels and wheel skins, boost trails, the
-boost flame, sparks, fireworks, clouds and weather. They live in `src/ui/icons.js` and
-`src/game/systems/fx.js` and are sharp at any size.
+These are the only images still below the resolution they need (they were sliced from the early
+composite sheets). Everything else is either delivered in HD or drawn in code. Run
+`python tools/art/asset_report.py` for the live numbers.
 
 ## How to deliver
 
 1. **One asset per request.** Start every prompt with: *"Generate ONLY this one image. Do not make a
-   sheet, collage, board or grid. No labels, borders or text."* The earlier batches came back as
-   collages because many assets were requested at once.
-2. Download the **original file** (not a screenshot), at the size given or larger.
-3. Sprites and parallax layers need **real transparency**, or a flat **#00FF00** background.
-   Never a painted checkerboard.
-4. Save it into `art/hd/` with the **same path** as the file it replaces, e.g. `art/hd/bg/park-sky.png`.
-5. Run `python tools/art/ingest.py --check` and then `python tools/art/ingest.py`. That keys out green,
-   trims, scales, validates and installs it. The game picks it up with no code change.
+   sheet, collage, board or grid. No labels, borders or text."*
+2. Download the **original file**, at the size given or larger.
+3. Sprites need **real transparency** or a flat **#00FF00** background. Never a painted checkerboard.
+4. Save it under `art/hd/` with the path given below (any image extension), then run:
+   ```bash
+   python tools/art/ingest.py
+   ```
+   Backdrops can instead go in your art folder as `BG_{name}.png` and be installed with
+   `python tools/art/ingest.py --from G:/game/fullresart`. Either way the tool keys out green,
+   trims, scales, warns if anything is too small and installs it. No code changes needed.
 
-Attach the two original reference boards plus `public/assets/carts/basic.webp` as style references.
+Attach the reference boards and `public/assets/carts/basic.webp` as style references.
 
 **Style line (end every prompt with it):** *polished playful 2D mobile game art, bright cartoon,
 rounded shapes, crisp dark outlines, soft shadows, warm glossy highlights, light from top-left,
 palette midnight #22213D, purple #48346F, pink #F4A6D7, gold #FFB62E, coral #E95757, blue #42A5EF,
 green #72C95A.*
 
----
-
-## Delivered
-
-- **All six worlds' gameplay layers** (`bg/{world}-sky|far|mid|near|ground`) and the weather strips
-  (`fx/embers|neon-sparkle|sand-wind|snow|steam`): installed from `fullresart/` in HD. The `ground`
-  layer textures the hills. Night Carnival has no `ground` yet (its hills use a colour fill).
-
-### Received but not usable as-is
-
-- `TRK001_rail_{world}.png`: straight trestle segments. The track is a curved spline, so a straight
-  picture can't be laid along it. The code rail's colours are matched to these instead.
-- `VEH001_basic-cart_paint-mask.png`: a different cart (has wheels, different body) from the game's
-  Basic cart, so it can't act as that cart's paint mask. If paint masks are wanted, export a
-  white version of exactly `public/assets/carts/basic.webp` (no wheels).
-
-## Tier 1: backgrounds (biggest visual win, 5–14× too small today)
-
-Still needed: `bg/garage`, `event/banner`, and optionally `bg/night-ground`.
-
-Delivered as dedicated art (`BG_*.png`): `bg/splash` (BG_splash), `bg/menu` (BG_menu_alt, arch on
-the left so the menu buttons have the centre), `bg/hub` for the hub and settings (BG_menu, arch in the
-centre behind the cards) and `bg/shop` (BG_shop). The splash and menu art have the logo painted in,
-so the game's own logo overlay is hidden on those screens. Note the splash sign reads
-"RollerCoaster Racing **2**", not "2D". `bg/loading` is still composed from the park layers with
-`tools/art/compose_backdrop.py`.
-
-Not used: the go-kart cart sheet and its six paint masks (racer, steampunk, crystal, neon...). They
-have car wheels and don't match the game's coaster carts or names (basic, wooden, steel, rocket,
-golden, dragon).
-The world layer prompts below are kept for reference.
-
-Parallax layers (`-far`, `-mid`, `-near`) are **3840×1080, transparent above the scenery, and tile
-seamlessly left to right**. The sky (`-sky`) is **1920×1080, fully painted**. Scenery sits in the
-bottom part of the frame: far ≈ bottom 40%, mid ≈ bottom 55%, near ≈ bottom 30%.
-
-| File | Prompt |
-| --- | --- |
-| `bg/park-sky` | Sunset sky only: deep purple top → pink → warm orange horizon, fluffy lilac clouds, a few faint stars, two small firework bursts. No ground. |
-| `bg/park-far` | Hazy purple silhouettes: fairytale castle with blue cone-roof towers and red flags, distant hills, faint ferris wheel. Low contrast. |
-| `bg/park-mid` | Carnival: big ferris wheel, striped red-yellow-purple circus tent with lit windows, looping red coaster in the distance, bulb strings, a hot-air balloon. |
-| `bg/park-near` | Leafy round trees and bushes, lamp posts with warm glow. |
-| `bg/night-sky` | Deep indigo night, stars, coloured spotlight beams, big fireworks. |
-| `bg/night-far` | Purple silhouettes of distant rides and a castle under the night sky. |
-| `bg/night-mid` | Neon-lit ferris wheel, carousel, glowing striped tents, bulb strings. |
-| `bg/night-near` | Dark bushes, glowing lamp posts, small neon shapes (no letters). |
-| `bg/mountain-sky` | Bright blue sky, puffy white clouds. |
-| `bg/mountain-far` | Blue snow-capped mountain range. |
-| `bg/mountain-mid` | Pine forest, wooden chalets, a rope bridge. |
-| `bg/mountain-near` | Tall pines and rocks, alpine flowers. |
-| `bg/desert-sky` | Warm orange-yellow dusty sky, heat haze. |
-| `bg/desert-far` | Distant sandstone mesas. |
-| `bg/desert-mid` | Red rock arches, striped desert tents, cacti, abandoned e-scooters half-buried in sand. |
-| `bg/desert-near` | Cacti and boulders. |
-| `bg/snow-sky` | Pale icy blue sky, light snowfall. |
-| `bg/snow-far` | Icy blue mountains. |
-| `bg/snow-mid` | Snow-covered pines, a frozen ferris wheel, an ice castle. |
-| `bg/snow-near` | Snowy bushes, lamp posts with icicles. |
-| `bg/volcano-sky` | Dark red-orange smoky sky with drifting embers. |
-| `bg/volcano-far` | Erupting volcano silhouette. |
-| `bg/volcano-mid` | Black rock cliffs, glowing lava falls, steam vents, scorched tents. |
-| `bg/volcano-near` | Charred trees and glowing rocks. |
-
-Full-screen backdrops, **1920×1080, fully painted, centre calm and slightly darker for UI**:
-
-| File | Prompt |
-| --- | --- |
-| `bg/splash` | Sweeping sunset carnival panorama, red coaster track climbing through the centre, castle and ferris wheel at the sides, fireworks. Top third clear for the logo. |
-| `bg/menu` | Sunset carnival with castle, circus tents and ferris wheel, middle softly darker. |
-| `bg/loading` | Dark purple silhouette of a coaster loop and ferris wheel against a glowing pink-orange sunset. Large empty centre. |
-| `bg/garage` | Cartoon garage interior: tool walls, tyre stacks, red toolbox, checkered floor, spotlight pool on an empty round platform. |
-| `event/banner` (1920×800) | Night carnival, neon ferris wheel, glowing tents, fireworks, a golden coaster cart bottom-right. Left half calmer for text. |
-
-## Tier 2: the train (3–4× too small)
-
-**1024×512, transparent, side view facing right, body only, NO wheels, seats visible on top,
-same size and chassis height for every cart:**
-
-`carts/basic` red body, yellow flame decal · `carts/wooden` warm wood slats, rivets ·
-`carts/steel` metallic blue streamlined shell · `carts/rocket` red/yellow racer with chrome rear
-nozzle · `carts/golden` gold plating, crown ornament · `carts/dragon` red-orange dragon head at the front.
-
-**512×512, transparent, seated passenger, side view facing right, waist up, sitting in a black coaster seat:**
-
-`riders/dave-calm`, `riders/dave-excited`, `riders/dave-terrified`, `riders/dave-dizzy`: Dave
-(swept brown hair, red shirt) with that expression · `riders/karen9000` boxy silver robot with a blonde
-bob and a megaphone · `riders/cryptobro` hoodie, gold chain, laser-eye glow · `riders/influencer`
-filming on a phone, peace sign · `riders/grandma` knitting, unbothered · `riders/goose` angry goose in a tiny helmet.
-
-
-## Tier 3: menus and cards (2–5× too small)
-
-`ui/logo` 2048×1024 transparent (check every letter) · `hub/adventure|events|multiplayer|challenge`
-800×1000 painted cards · `cards/park|night|mountain|desert|snow|volcano` 640×400 painted thumbnails
-· `avatars/dave|karen9000|cryptobro|influencer|grandma|goose` 512×512 round portraits (no frame;
-frames are code) · `event/reward` 512×512 neon cart on a pedestal.
-
-## Tier 4: illustrated items (least visible)
-
-512×512 transparent each: `shop/coin-pile`, `shop/coin-sack`, `shop/coin-chest`, `shop/skin-bundle`,
-`rewards/day7-cart` (the Golden Cart on a small pedestal).
+**Don't send** (already drawn in code, sharp at any size): UI icons, coins, gems, power-ups, stars,
+medals, trophy, avatar frames, the garage platform, the results ribbon, wheels and wheel skins, boost
+trails, flames, sparks, fireworks, clouds, weather. Also no logo: the splash and menu backdrops carry it.
 
 ---
 
-## Full list (generated)
+## 1. Backdrops (most visible)
+
+**1920×1080, fully painted, no text.**
+
+| Save as | Goes to | Prompt |
+| --- | --- | --- |
+| `BG_garage.png` | Garage screen | Cartoon coaster workshop interior: tool wall, tyre stacks, red toolbox, checkered floor, warm hanging lamps, a spotlight pool on an empty round display platform **left of centre**. Right third calmer and darker (a stats panel sits there). |
+| `BG_events.png` | Events screen | Night carnival: neon ferris wheel, glowing striped tents, fireworks, a golden coaster cart on a lit track bottom-right. **Left half calm and dark** for event text. |
+
+Optional:
+- `night-ground.png` (3840×1080, transparent above the ground strip) to texture the Night Carnival
+  hills like the other worlds.
+- `BG_loading.png` for a dedicated loading screen (today it's a silhouette composed from the park layers).
+
+## 2. The train (seen every run)
+
+**Carts: 1024×512, transparent, side view facing right, body only, NO wheels (wheels are drawn in
+code), 2–3 seat backs visible on top, same size and chassis height as `carts/basic.webp`.** These are
+roller coaster cars, not go-karts.
+
+| Save as | Prompt |
+| --- | --- |
+| `art/hd/carts/basic.png` | Glossy red coaster car, yellow-orange flame decal along the side, chrome front bumper, small glowing headlight. |
+| `art/hd/carts/wooden.png` | Warm brown wooden slat coaster car, iron rivets and corner brackets, dark leather seats. |
+| `art/hd/carts/steel.png` | Sleek metallic blue streamlined coaster car, steel trim, chrome accents, pointed nose. |
+| `art/hd/carts/rocket.png` | Red and yellow racing coaster car with a chrome rocket nozzle at the rear, racing stripes. No flame (that's code). |
+| `art/hd/carts/golden.png` | Gold-plated coaster car, small crown ornament at the front, engraved trim, red velvet seats. |
+| `art/hd/carts/dragon.png` | Red-orange coaster car shaped like a dragon: sculpted head with horns at the front, scales, spiked tail. |
+
+**Riders: 512×512, transparent, side view facing right, waist up, sitting in a black coaster seat
+(seat back visible), same framing for all.**
+
+| Save as | Prompt |
+| --- | --- |
+| `art/hd/riders/dave-calm.png` | Dave: swept brown hair, red shirt, relaxed smile. |
+| `art/hd/riders/dave-excited.png` | Dave: big open grin, eyes wide, hair blown back. |
+| `art/hd/riders/dave-terrified.png` | Dave: screaming, sweat drops, gripping the bar. |
+| `art/hd/riders/dave-dizzy.png` | Dave: spiral eyes, little stars circling his head. |
+| `art/hd/riders/karen9000.png` | Karen-9000: boxy silver robot, blonde bob haircut, red visor eyes, megaphone. |
+| `art/hd/riders/cryptobro.png` | Crypto Bro: purple hoodie, gold coin chain, red laser-eye glow, fist up. |
+| `art/hd/riders/influencer.png` | Influencer: ponytail, sunglasses on head, filming on a phone, peace sign. |
+| `art/hd/riders/grandma.png` | Grandma: white bun, round glasses, knitting, totally unbothered. |
+| `art/hd/riders/goose.png` | A goose in a tiny red aviator helmet and goggles, honking. |
+
+## 3. Menu art
+
+| Save as | Size | Prompt |
+| --- | --- | --- |
+| `art/hd/hub/adventure.png` | 800×1000 | Dave cheering in the red flame coaster car cresting a sunset hill, castle behind. Bottom third darker for a label. |
+| `art/hd/hub/events.png` | 800×1000 | Night carnival tent with fireworks and a neon ferris wheel. Bottom third darker. |
+| `art/hd/hub/multiplayer.png` | 800×1000 | Two coaster cars racing side by side, crossed chequered flags above. Bottom third darker. |
+| `art/hd/hub/challenge.png` | 800×1000 | Gold trophy on a rock under spotlight beams, coasters behind. Bottom third darker. |
+| `art/hd/cards/{world}.png` | 640×400 | One per world (`park`, `night`, `mountain`, `desert`, `snow`, `volcano`): a small scene with a coaster, strong focal point, readable at 160 px wide. |
+| `art/hd/avatars/{name}.png` | 512×512 | Round head-and-shoulders portraits, transparent, no frame: `dave`, `karen9000`, `cryptobro`, `influencer`, `grandma`, `goose` (same looks as the riders). |
+
+## 4. Shop and reward items (least visible)
+
+**512×512, transparent:**
+
+| Save as | Prompt |
+| --- | --- |
+| `art/hd/shop/coin-pile.png` | Small pile of gold star coins. |
+| `art/hd/shop/coin-sack.png` | Bulging sack of gold coins. |
+| `art/hd/shop/coin-chest.png` | Open treasure chest overflowing with gold coins. |
+| `art/hd/shop/skin-bundle.png` | Three mini coaster cars in different paints, fanned out. |
+| `art/hd/rewards/day7-cart.png` | The gold-plated coaster car on a small round pedestal, sparkles. |
+| `art/hd/event/reward.png` | A neon purple coaster car on a glowing pedestal. |
+
+---
+
+## Current sizes (generated)
 
 | File | Now | Target | Short by | Use |
 | --- | --- | --- | --- | --- |
 | `bg/garage.webp` | 501×218 | 1920×1080 | 5.0× | full-screen backdrop |
-| `ui/logo.webp` | 507×233 | 2048×1024 | 4.4× | logo |
 | `riders/dave-calm.webp` | 117×147 | 512×512 | 4.4× | seated rider |
 | `riders/dave-excited.webp` | 123×148 | 512×512 | 4.2× | seated rider |
 | `event/banner.webp` | 904×197 | 1920×800 | 4.1× | full-screen event backdrop |
@@ -177,42 +144,3 @@ frames are code) · `event/reward` 512×512 neon cart on a pedestal.
 | `hub/events.webp` | 304×366 | 800×1000 | 2.7× | hub card |
 | `hub/adventure.webp` | 312×366 | 800×1000 | 2.7× | hub card |
 | `event/reward.webp` | 227×161 | 256×256 | 1.6× | icon |
-| `fx/steam.webp` | 1024×128 | 1024×128 | 1.0× | 8-frame effect strip |
-| `fx/snow.webp` | 1024×128 | 1024×128 | 1.0× | 8-frame effect strip |
-| `fx/sand-wind.webp` | 1024×128 | 1024×128 | 1.0× | 8-frame effect strip |
-| `fx/neon-sparkle.webp` | 1024×128 | 1024×128 | 1.0× | 8-frame effect strip |
-| `fx/embers.webp` | 1024×128 | 1024×128 | 1.0× | 8-frame effect strip |
-| `bg/volcano-sky.webp` | 1920×1080 | 1920×1080 | 1.0× | full-screen sky |
-| `bg/volcano-near.webp` | 2880×810 | 2880×810 | 1.0× | parallax layer, tiles horizontally |
-| `bg/volcano-mid.webp` | 2880×810 | 2880×810 | 1.0× | parallax layer, tiles horizontally |
-| `bg/volcano-ground.webp` | 2880×810 | 2880×810 | 1.0× | parallax layer, tiles horizontally |
-| `bg/volcano-far.webp` | 2880×810 | 2880×810 | 1.0× | parallax layer, tiles horizontally |
-| `bg/splash.webp` | 1920×1080 | 1920×1080 | 1.0× | full-screen backdrop |
-| `bg/snow-sky.webp` | 1920×1080 | 1920×1080 | 1.0× | full-screen sky |
-| `bg/snow-near.webp` | 2880×810 | 2880×810 | 1.0× | parallax layer, tiles horizontally |
-| `bg/snow-mid.webp` | 2880×810 | 2880×810 | 1.0× | parallax layer, tiles horizontally |
-| `bg/snow-ground.webp` | 2880×810 | 2880×810 | 1.0× | parallax layer, tiles horizontally |
-| `bg/snow-far.webp` | 2880×810 | 2880×810 | 1.0× | parallax layer, tiles horizontally |
-| `bg/shop.webp` | 1920×1080 | 1920×1080 | 1.0× | full-screen backdrop |
-| `bg/park-sky.webp` | 1920×1080 | 1920×1080 | 1.0× | full-screen sky |
-| `bg/park-near.webp` | 2880×810 | 2880×810 | 1.0× | parallax layer, tiles horizontally |
-| `bg/park-mid.webp` | 2880×810 | 2880×810 | 1.0× | parallax layer, tiles horizontally |
-| `bg/park-ground.webp` | 2880×810 | 2880×810 | 1.0× | parallax layer, tiles horizontally |
-| `bg/park-far.webp` | 2880×810 | 2880×810 | 1.0× | parallax layer, tiles horizontally |
-| `bg/night-sky.webp` | 1920×1080 | 1920×1080 | 1.0× | full-screen sky |
-| `bg/night-near.webp` | 2880×810 | 2880×810 | 1.0× | parallax layer, tiles horizontally |
-| `bg/night-mid.webp` | 2880×810 | 2880×810 | 1.0× | parallax layer, tiles horizontally |
-| `bg/night-far.webp` | 2880×810 | 2880×810 | 1.0× | parallax layer, tiles horizontally |
-| `bg/mountain-sky.webp` | 1920×1080 | 1920×1080 | 1.0× | full-screen sky |
-| `bg/mountain-near.webp` | 2880×810 | 2880×810 | 1.0× | parallax layer, tiles horizontally |
-| `bg/mountain-mid.webp` | 2880×810 | 2880×810 | 1.0× | parallax layer, tiles horizontally |
-| `bg/mountain-ground.webp` | 2880×810 | 2880×810 | 1.0× | parallax layer, tiles horizontally |
-| `bg/mountain-far.webp` | 2880×810 | 2880×810 | 1.0× | parallax layer, tiles horizontally |
-| `bg/menu.webp` | 1920×1080 | 1920×1080 | 1.0× | full-screen backdrop |
-| `bg/loading.webp` | 1920×1080 | 1920×1080 | 1.0× | full-screen backdrop |
-| `bg/hub.webp` | 1920×1080 | 1920×1080 | 1.0× | full-screen backdrop |
-| `bg/desert-sky.webp` | 1920×1080 | 1920×1080 | 1.0× | full-screen sky |
-| `bg/desert-near.webp` | 2880×810 | 2880×810 | 1.0× | parallax layer, tiles horizontally |
-| `bg/desert-mid.webp` | 2880×810 | 2880×810 | 1.0× | parallax layer, tiles horizontally |
-| `bg/desert-ground.webp` | 2880×810 | 2880×810 | 1.0× | parallax layer, tiles horizontally |
-| `bg/desert-far.webp` | 2880×810 | 2880×810 | 1.0× | parallax layer, tiles horizontally |

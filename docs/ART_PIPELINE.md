@@ -36,9 +36,12 @@ Put the original in `art/hd/` under the same path and run `python tools/art/inge
 low-resolution placeholders sliced from composite sheets. Target sizes: backgrounds 1920×1080 (parallax layers 3840×1080),
 carts 1024×512, riders and portraits 512×512, UI icons 256×256.
 
-| File | Used for |
+| Files | Used for |
 | --- | --- |
-| `bg/park-{sky,far,mid,near}.webp` | gameplay parallax layers |
-| `bg/splash.webp`, `bg/garage.webp` | title/menu and garage backgrounds |
-| `carts/<id>.webp`, `carts/coaster-wheel.webp`, `riders/*.webp` | carts, wheels and riders |
-| `ui/logo.webp`, `ui/fuel.webp`, `ui/ribbon.webp` | logo, fuel can, results ribbon |
+| `bg/{world}-{sky,far,mid,near,ground}.webp` | gameplay parallax layers (ground textures the hills) |
+| `bg/splash`, `bg/menu`, `bg/hub`, `bg/shop`, `bg/loading`, `bg/garage` | screen backdrops |
+| `fx/*.webp` | 8-frame weather strips |
+| `carts/<id>.webp`, `riders/*.webp`, `avatars/*.webp` | the train, its riders, portraits |
+| `hub/*`, `cards/*`, `event/*`, `shop/*`, `rewards/*` | menu cards and illustrated items |
+
+Everything else (icons, wheels, trails, frames, ribbon, plinth, effects) is drawn in code.

@@ -46,7 +46,7 @@ NEW_OK = (re.compile(r"^bg/[a-z]+-ground\.webp$"), re.compile(r"^fx/[a-z-]+\.web
 # Screen backdrops by generator name. BG_menu has its logo arch dead centre (behind the menu
 # buttons), so it backs the hub and settings; BG_menu_alt keeps the centre clear for the menu.
 SCREEN_BG = {"splash": "bg/splash.webp", "menu_alt": "bg/menu.webp", "menu": "bg/hub.webp", "shop": "bg/shop.webp",
-             "loading": "bg/loading.webp", "garage": "bg/garage.webp"}
+             "loading": "bg/loading.webp", "garage": "bg/garage.webp", "events": "event/banner.webp"}
 WORLDS = ("park", "night", "mountain", "desert", "snow", "volcano")
 
 
