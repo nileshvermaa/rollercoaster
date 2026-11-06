@@ -6,7 +6,6 @@
 .btn, .back-btn, .icon-btn, .tab, .side-btn, .hub-card, .level-card, .car-thumb, .swatch, .opt,
 .shop-card, .pu, .pause-btn, .close-btn, .chev, .plus, .tap-start, .pedal, .lb-row, .mission, .day, .set-row {
   transition: transform 0.14s cubic-bezier(.3, 1.6, .5, 1), filter 0.14s, box-shadow 0.14s, background-color 0.14s;
-  will-change: transform;
 }
 
 @media (hover: hover) {

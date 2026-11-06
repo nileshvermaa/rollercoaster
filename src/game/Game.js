@@ -54,10 +54,16 @@ export class Game {
     bindSettings(this);
   }
 
-  /** Scale the 844×390 design frame to fit the viewport. */
+  /** Scale the 844×390 design frame to fit the viewport, pixel-aligned to prevent font/border blur. */
   fitStage() {
     const s = Math.min(innerWidth / 844, innerHeight / 390);
+    const stageW = 844 * s;
+    const stageH = 390 * s;
+    const x = Math.round((innerWidth - stageW) / 2);
+    const y = Math.round((innerHeight - stageH) / 2);
     document.documentElement.style.setProperty('--s', s.toFixed(4));
+    document.documentElement.style.setProperty('--stage-x', `${x}px`);
+    document.documentElement.style.setProperty('--stage-y', `${y}px`);
   }
 
   bindNavigation() {

@@ -33,22 +33,45 @@ html, body {
   user-select: none;
   -webkit-tap-highlight-color: transparent;
   touch-action: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
 #app { position: fixed; inset: 0; }
 #world { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 
 .stage {
-  position: absolute; left: 50%; top: 50%;
-  width: 844px; height: 390px;
-  transform: translate(-50%, -50%) scale(var(--s));
+  position: absolute;
+  left: var(--stage-x, 50%);
+  top: var(--stage-y, 50%);
+  width: 844px;
+  height: 390px;
+  transform: scale(var(--s));
+  transform-origin: 0 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
-h2 { margin: 0; font-family: var(--lilita); font-weight: 400; font-size: 26px; text-shadow: 0 3px 0 var(--ink); }
+/* Explicit font-weight: 400 on all Lilita One typography to stop faux-bold blur/smearing */
+h2, .h-l, .h-xl, .h-xxl, .btn, .chip, .tab, .back-btn, .icon-btn, .side-btn,
+.who, .name-edit input, .lb-row .nm, .lb-row .sc, .lb-row .rank, .cz-label,
+.event-timer, .dist-row, .load-pct, .tap-start, .ribbon span, .stats b,
+.day b, .day span, .hub-card b, .level-card .meta b, .shop-card b,
+.mission .reward, .stat-card b, .pick, .chev, .badge, .pu b, .pedal b,
+.g-label, .rarity, .event-reward b, .close-btn {
+  font-weight: 400;
+}
+
+h2 { margin: 0; font-family: var(--lilita); font-size: 26px; text-shadow: 0 3px 0 var(--ink); }
 .h-l { font-family: var(--lilita); font-size: 24px; }
 .h-xl { font-family: var(--lilita); font-size: 34px; }
 .h-xxl { font-family: var(--lilita); font-size: 38px; line-height: 1; }
-.outline { text-shadow: 0 3px 0 var(--ink), 2px 0 0 var(--ink), -2px 0 0 var(--ink), 0 -2px 0 var(--ink); }
+.outline {
+  text-shadow: 0 3px 0 var(--ink), 2px 0 0 var(--ink), -2px 0 0 var(--ink), 0 -2px 0 var(--ink);
+  -webkit-text-stroke: 1.2px var(--ink);
+  paint-order: stroke fill;
+}
 .glow { text-shadow: 0 3px 0 var(--ink), 0 0 18px rgba(244, 166, 215, 0.7); }
 .hidden { display: none !important; }
 .grow { flex: 1; }
@@ -147,6 +170,7 @@ a:hover { color: #fff; }
 .badge {
   position: absolute; right: -6px; top: -6px; min-width: 20px; height: 20px; padding: 0 5px; border-radius: 999px;
   background: var(--coral); border: 2px solid var(--ink); font-family: var(--lilita); font-size: 12px; line-height: 16px; font-weight: 400;
+  display: inline-flex; align-items: center; justify-content: center;
 }
 
 .toast {

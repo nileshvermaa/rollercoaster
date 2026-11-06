@@ -105,7 +105,7 @@ const ICONS = {
     <circle cx="44" cy="50" r="26" fill="#FFE15C" stroke="#B86A00" stroke-width="3"/>
     <path d="M44 32 L49 44 L62 45 L52 53 L55 66 L44 59 L33 66 L36 53 L26 45 L39 44Z" fill="#FFC928" stroke="#B86A00" stroke-width="2"/>
     <rect x="56" y="58" width="40" height="30" rx="10" fill="#E95757" stroke="${INK}" stroke-width="4"/>
-    <text x="76" y="80" text-anchor="middle" font-family="Lilita One, sans-serif" font-size="22" fill="#fff">×2</text>`,
+    <text x="76" y="80" text-anchor="middle" font-family="Lilita One, sans-serif" font-size="22" font-weight="400" fill="#fff">×2</text>`,
   timer: () => `
     <rect x="42" y="4" width="16" height="12" rx="3" fill="#FFC928" stroke="${INK}" stroke-width="4"/>
     <path d="M74 20 L84 12" stroke="${INK}" stroke-width="7" stroke-linecap="round"/>
@@ -153,7 +153,7 @@ for (const [n, [hi, mid, lo, ribbon]] of Object.entries(MEDALS)) {
     <path d="M30 56 L18 94 L32 86 L40 98 L48 62Z M70 56 L82 94 L68 86 L60 98 L52 62Z" fill="${ribbon}" stroke="${INK}" stroke-width="4" stroke-linejoin="round"/>
     <circle cx="50" cy="40" r="34" fill="url(#${u('g', 1)})" stroke="${INK}" stroke-width="5"/>
     <circle cx="50" cy="40" r="25" fill="none" stroke="${lo}" stroke-width="3" opacity=".6"/>
-    <text x="50" y="53" text-anchor="middle" font-family="Lilita One, sans-serif" font-size="38" fill="${lo}">${n}</text>`;
+    <text x="50" y="53" text-anchor="middle" font-family="Lilita One, sans-serif" font-size="38" font-weight="400" fill="${lo}">${n}</text>`;
 }
 
 function build(name) {

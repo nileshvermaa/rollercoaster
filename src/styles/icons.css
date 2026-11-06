@@ -12,8 +12,8 @@
 .event-timer [data-icon] { width: 36px; height: 36px; }
 .lb-trophy { width: 100px; height: 100px; }
 .set-row > [data-icon] { width: 26px; height: 26px; padding: 4px; border-radius: 8px; background: #3a3d63; }
-.avatar-sm .frame { position: absolute; left: -2px; top: -3px; width: 48px; height: 48px; }
-.avatar-lg .frame { position: absolute; left: -2px; top: 0; width: 124px; height: 124px; }
+.avatar-sm .frame { position: absolute; left: -2px; top: -2px; width: 48px; height: 48px; pointer-events: none; }
+.avatar-lg .frame { position: absolute; left: 0; top: 0; width: 120px; height: 120px; pointer-events: none; }
 
 .gem-i { display: inline-block; width: 16px; height: 16px; vertical-align: -3px; }
 .lock-ico { width: 44px; height: 46px; }
