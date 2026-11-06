@@ -48,8 +48,17 @@ green #72C95A.*
 ## Tier 1: backgrounds (biggest visual win, 5–14× too small today)
 
 Still needed: `bg/garage`, `event/banner`, and optionally `bg/night-ground`.
-`bg/splash`, `bg/menu` and `bg/loading` are now composed in HD from the park layers with
-`tools/art/compose_backdrop.py`. Dedicated art can still replace them later (same file names).
+
+Delivered as dedicated art (`BG_*.png`): `bg/splash` (BG_splash), `bg/menu` (BG_menu_alt, arch on
+the left so the menu buttons have the centre), `bg/hub` for the hub and settings (BG_menu, arch in the
+centre behind the cards) and `bg/shop` (BG_shop). The splash and menu art have the logo painted in,
+so the game's own logo overlay is hidden on those screens. Note the splash sign reads
+"RollerCoaster Racing **2**", not "2D". `bg/loading` is still composed from the park layers with
+`tools/art/compose_backdrop.py`.
+
+Not used: the go-kart cart sheet and its six paint masks (racer, steampunk, crystal, neon...). They
+have car wheels and don't match the game's coaster carts or names (basic, wooden, steel, rocket,
+golden, dragon).
 The world layer prompts below are kept for reference.
 
 Parallax layers (`-far`, `-mid`, `-near`) are **3840×1080, transparent above the scenery, and tile
@@ -184,6 +193,7 @@ frames are code) · `event/reward` 512×512 neon cart on a pedestal.
 | `bg/snow-mid.webp` | 2880×810 | 2880×810 | 1.0× | parallax layer, tiles horizontally |
 | `bg/snow-ground.webp` | 2880×810 | 2880×810 | 1.0× | parallax layer, tiles horizontally |
 | `bg/snow-far.webp` | 2880×810 | 2880×810 | 1.0× | parallax layer, tiles horizontally |
+| `bg/shop.webp` | 1920×1080 | 1920×1080 | 1.0× | full-screen backdrop |
 | `bg/park-sky.webp` | 1920×1080 | 1920×1080 | 1.0× | full-screen sky |
 | `bg/park-near.webp` | 2880×810 | 2880×810 | 1.0× | parallax layer, tiles horizontally |
 | `bg/park-mid.webp` | 2880×810 | 2880×810 | 1.0× | parallax layer, tiles horizontally |
@@ -200,6 +210,7 @@ frames are code) · `event/reward` 512×512 neon cart on a pedestal.
 | `bg/mountain-far.webp` | 2880×810 | 2880×810 | 1.0× | parallax layer, tiles horizontally |
 | `bg/menu.webp` | 1920×1080 | 1920×1080 | 1.0× | full-screen backdrop |
 | `bg/loading.webp` | 1920×1080 | 1920×1080 | 1.0× | full-screen backdrop |
+| `bg/hub.webp` | 1920×1080 | 1920×1080 | 1.0× | full-screen backdrop |
 | `bg/desert-sky.webp` | 1920×1080 | 1920×1080 | 1.0× | full-screen sky |
 | `bg/desert-near.webp` | 2880×810 | 2880×810 | 1.0× | parallax layer, tiles horizontally |
 | `bg/desert-mid.webp` | 2880×810 | 2880×810 | 1.0× | parallax layer, tiles horizontally |

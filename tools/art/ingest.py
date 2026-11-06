@@ -11,6 +11,7 @@ extension, e.g.  art/hd/bg/park-sky.png  ->  public/assets/bg/park-sky.webp
 With --from, file names are mapped to game paths:
   {world}-{sky|far|mid|near|ground}.png  ->  bg/{world}-{layer}.webp
   FX_{name}.png                          ->  fx/{name}.webp
+  BG_{screen}.png                        ->  a screen backdrop (see SCREEN_BG below)
 
 For each file it:
   - refuses names the game does not use (typos would otherwise be silently ignored),
@@ -37,11 +38,15 @@ DST = REPO / "public" / "assets"
 EXTS = {".png", ".webp", ".jpg", ".jpeg"}
 
 # Full-bleed pictures: never cut out or trimmed.
-OPAQUE_PREFIXES = ("bg/menu", "bg/splash", "bg/loading", "bg/garage", "hub/", "cards/", "event/banner")
+OPAQUE_PREFIXES = ("bg/menu", "bg/splash", "bg/loading", "bg/garage", "bg/hub", "bg/shop", "hub/", "cards/", "event/banner")
 
 
 # New assets the game is ready for even though no placeholder file exists yet.
-NEW_OK = (re.compile(r"^bg/[a-z]+-ground\.webp$"), re.compile(r"^fx/[a-z-]+\.webp$"))
+NEW_OK = (re.compile(r"^bg/[a-z]+-ground\.webp$"), re.compile(r"^fx/[a-z-]+\.webp$"), re.compile(r"^bg/(hub|shop)\.webp$"))
+# Screen backdrops by generator name. BG_menu has its logo arch dead centre (behind the menu
+# buttons), so it backs the hub and settings; BG_menu_alt keeps the centre clear for the menu.
+SCREEN_BG = {"splash": "bg/splash.webp", "menu_alt": "bg/menu.webp", "menu": "bg/hub.webp", "shop": "bg/shop.webp",
+             "loading": "bg/loading.webp", "garage": "bg/garage.webp"}
 WORLDS = ("park", "night", "mountain", "desert", "snow", "volcano")
 
 
@@ -54,6 +59,9 @@ def map_flat(name):
     m = re.fullmatch(r"FX_([a-z-]+)", stem)
     if m:
         return f"fx/{m.group(1)}.webp"
+    m = re.fullmatch(r"BG_([a-z_]+)", stem)
+    if m and m.group(1) in SCREEN_BG:
+        return SCREEN_BG[m.group(1)]
     return None
 
 
