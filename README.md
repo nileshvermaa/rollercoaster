@@ -65,6 +65,7 @@ docs/           architecture, design doc, art pipeline and image prompts, roadma
   track features and worlds.
 - [docs/GAME_DESIGN.md](docs/GAME_DESIGN.md): story, tone, look and feel.
 - [docs/ART_PIPELINE.md](docs/ART_PIPELINE.md): how to make and drop in art.
+- [docs/ART_NEEDED.md](docs/ART_NEEDED.md): which images still need HD versions, in priority order, with prompts.
 - [CONTRIBUTING.md](CONTRIBUTING.md): workflow and style.
 
 ## Deploy

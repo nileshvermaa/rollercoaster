@@ -2,3 +2,5 @@ node_modules
 dist
 .vercel
 .claude/settings.local.json
+art/hd/*
+!art/hd/.gitkeep

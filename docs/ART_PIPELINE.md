@@ -22,13 +22,14 @@ python tools/art/slice_sheet.py boxes <sheet.png> <boxes.txt> <out_dir> # slice 
 
 ## Dropping art in
 
-Replace the file in `public/assets/` with the same name; no code changes needed. Current files are
-low-resolution placeholders sliced from composite sheets. Target sizes: backgrounds 1920 px wide,
-carts 512 px wide, UI icons 256 px.
+Put the original in `art/hd/` under the same path and run `python tools/art/ingest.py` (see
+[ART_NEEDED.md](ART_NEEDED.md) for the priority list and prompts). Current files are
+low-resolution placeholders sliced from composite sheets. Target sizes: backgrounds 1920×1080 (parallax layers 3840×1080),
+carts 1024×512, riders and portraits 512×512, UI icons 256×256.
 
 | File | Used for |
 | --- | --- |
 | `bg/park-{sky,far,mid,near}.webp` | gameplay parallax layers |
 | `bg/splash.webp`, `bg/garage.webp` | title/menu and garage backgrounds |
-| `carts/<id>.webp`, `carts/wheel.webp`, `carts/driver.webp` | the cart, wheels and Dave |
-| `ui/logo.webp`, `ui/fuel.webp`, `ui/karen.webp`, `ui/ribbon.webp` | logo, fuel can, Karen, results ribbon |
+| `carts/<id>.webp`, `carts/coaster-wheel.webp`, `riders/*.webp` | carts, wheels and riders |
+| `ui/logo.webp`, `ui/fuel.webp`, `ui/ribbon.webp` | logo, fuel can, results ribbon |
