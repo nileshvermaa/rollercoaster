@@ -5,7 +5,7 @@ import { Track } from '../../world/track.js';
 import { createCart, stepCart, liftRatio, rescue } from '../physics.js';
 import { cartStats } from '../../content/carts.js';
 import { worldById } from '../../content/worlds.js';
-import { PHYS, RUN } from '../../content/tuning.js';
+import { PHYS, RUN, zoneAt, zoneName } from '../../content/tuning.js';
 import { QUIPS, pick } from '../../content/story.js';
 
 const DT = 1 / PHYS.stepHz;
@@ -29,7 +29,7 @@ export function startRun(game, opts = {}) {
   game.run = {
     coins: 0, boosts: 0, airtime: 0, cleanLandings: 0, fuelCans: 0, derailed: false,
     stall: 0, over: false, overTimer: 0, danger: 0, maxX: 200,
-    magnet: 0, shieldUsed: false, boostGlow: 0,
+    magnet: 0, shieldUsed: false, boostGlow: 0, zone: 0,
   };
   game.time = 0;
   game.acc = 0;
@@ -103,6 +103,12 @@ export function updateRun(game, dt) {
     if (cart.crashed) break;
   }
   run.maxX = Math.max(run.maxX, cart.x);
+  const zone = zoneAt(run.maxX);
+  if (zone > run.zone) {
+    run.zone = zone;
+    game.sound.play('clean');
+    game.say(`Zone ${zone + 1}: ${zoneName(zone)}. Sharper crests ahead, brake before the tops.`, true);
+  }
   run.magnet = Math.max(0, run.magnet - dt);
   run.boostGlow = Math.max(0, run.boostGlow - dt);
 

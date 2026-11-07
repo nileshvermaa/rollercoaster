@@ -40,7 +40,6 @@ carts 1024×512, riders and portraits 512×512, UI icons 256×256.
 | --- | --- |
 | `bg/{world}-{sky,far,mid,near,ground}.webp` | gameplay parallax layers (ground textures the hills) |
 | `bg/splash`, `bg/menu`, `bg/hub`, `bg/shop`, `bg/loading`, `bg/garage` | screen backdrops |
-| `fx/*.webp` | 8-frame weather strips |
 | `carts/<id>.webp`, `riders/*.webp`, `avatars/*.webp` | the train, its riders, portraits |
 | `hub/*`, `cards/*`, `event/*`, `shop/*`, `rewards/*` | menu cards and illustrated items |
 

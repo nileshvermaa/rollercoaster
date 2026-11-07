@@ -10,7 +10,6 @@ extension, e.g.  art/hd/bg/park-sky.png  ->  public/assets/bg/park-sky.webp
 
 With --from, file names are mapped to game paths:
   {world}-{sky|far|mid|near|ground}.png  ->  bg/{world}-{layer}.webp
-  FX_{name}.png                          ->  fx/{name}.webp
   BG_{screen}.png                        ->  a screen backdrop (see SCREEN_BG below)
 
 For each file it:
@@ -42,7 +41,7 @@ OPAQUE_PREFIXES = ("bg/menu", "bg/splash", "bg/loading", "bg/garage", "bg/hub", 
 
 
 # New assets the game is ready for even though no placeholder file exists yet.
-NEW_OK = (re.compile(r"^bg/[a-z]+-ground\.webp$"), re.compile(r"^fx/[a-z-]+\.webp$"), re.compile(r"^bg/(hub|shop)\.webp$"))
+NEW_OK = (re.compile(r"^bg/[a-z]+-ground\.webp$"), re.compile(r"^bg/(hub|shop)\.webp$"))
 # Screen backdrops by generator name. BG_menu has its logo arch dead centre (behind the menu
 # buttons), so it backs the hub and settings; BG_menu_alt keeps the centre clear for the menu.
 SCREEN_BG = {"splash": "bg/splash.webp", "menu_alt": "bg/menu.webp", "menu": "bg/hub.webp", "shop": "bg/shop.webp",
@@ -56,9 +55,6 @@ def map_flat(name):
     m = re.fullmatch(r"([a-z]+)-(sky|far|mid|near|ground)", stem)
     if m and m.group(1) in WORLDS:
         return f"bg/{stem}.webp"
-    m = re.fullmatch(r"FX_([a-z-]+)", stem)
-    if m:
-        return f"fx/{m.group(1)}.webp"
     m = re.fullmatch(r"BG_([a-z_]+)", stem)
     if m and m.group(1) in SCREEN_BG:
         return SCREEN_BG[m.group(1)]
@@ -98,8 +94,8 @@ def process(path, check, rel=None):
             im = Image.fromarray(np.dstack([despill(rgb), a]), "RGBA")
             notes.append("background keyed out")
         box = im.getchannel("A").getbbox()
-        # Parallax layers and FX strips keep their full frame: their position in the frame matters.
-        if box and not (rel.startswith("bg/") or rel.startswith("fx/")):
+        # Parallax layers keep their full frame: their position in the frame matters.
+        if box and not rel.startswith("bg/"):
             im = im.crop(box)
 
     w, h = im.size

@@ -1,12 +1,37 @@
 // The endless rail: a Catmull-Rom spline through evenly spaced knots, generated ahead of the cart
-// from a seed. Also owns what sits on the rail: jump gaps, booster pads, coins and fuel cans.
-// Pure data, no DOM, so tests can drive it.
+// from a seed as a string of hand-shaped sections (rollers, hills, drops, camelbacks, jumps)
+// picked for the difficulty at that distance. Also owns what sits on the rail: jump gaps,
+// booster pads, coins and fuel cans. Pure data, no DOM, so tests can drive it.
 
 import { mulberry32, clamp, DEG } from '../engine/math.js';
 import { WORLD, PHYS, RUN, difficultyAt } from '../content/tuning.js';
 
 const SEG = WORLD.segment;
 const MAX_SLOPE = Math.tan(WORLD.maxSlopeDeg * DEG);
+
+// A knot that stands P above both neighbours throws the cart off above sqrt(g * SEG^2 / 2P),
+// so crest height is the difficulty dial: P 25 -> ~1000 px/s, P 120 -> ~470 px/s.
+// Each section returns knot heights relative to its start; 'J' asks for a booster jump.
+const SECTIONS = {
+  breather: { w: (d) => 2.2 - 1.6 * d, knots: (d, r) => [r(-8, 8), r(-8, 8), r(-8, 8)] },
+  rollers: {
+    w: () => 2,
+    knots: (d, r) => {
+      const a = r(15, 25 + 45 * d), out = [];
+      for (let n = 2 + Math.floor(r(0, 1 + 2 * d)); n > 0; n--) out.push(a, 0);
+      return out;
+    },
+  },
+  hill: { w: () => 2, knots: (d, r) => { const s = r(50, 70 + 70 * d); return [s, 2 * s, 2.5 * s, 2 * s, s, 0]; } },
+  climb: { w: () => 1, knots: (d, r) => { const s = r(60, 80 + 50 * d); return [s, 2 * s, 3 * s, 3 * s]; } },
+  drop: { w: () => 1.2, knots: (d, r) => { const s = r(70, 100 + 60 * d); return [-s, -2 * s, -3 * s, -3 * s]; } },
+  camelback: {
+    w: (d) => Math.max(0, 3 * d - 0.15),
+    knots: (d, r) => { const D = r(70, 110), P = r(55, 65 + 60 * d); return [-D, -2 * D, -2 * D + P, -2 * D, -2.5 * D]; },
+  },
+  jump: { w: (d, x) => (x > RUN.gapFromX ? 0.6 + 1.6 * d : 0), knots: () => [0, 0, 'J'] },
+};
+const HARD = new Set(['camelback', 'jump']);
 
 export class Track {
   constructor(seed = 1, { hills = 0 } = {}) {
@@ -18,7 +43,8 @@ export class Track {
     this.boosters = []; // { x0, x1, id }
     this.items = []; // { kind: 'coin' | 'fuel', x, y, taken }
     this.nextFuelX = 1200;
-    this.gapCooldown = 0;
+    this.queue = []; // planned knots: absolute heights, or 'J' for a jump
+    this.last = 'breather';
     this.itemSeg = 0; // next segment that still needs items
     for (let i = 0; i < WORLD.runwayKnots; i++) this.h.push(0);
     this.ensure(4000);
@@ -97,19 +123,33 @@ export class Track {
     return m;
   }
 
-  _addKnot() {
-    const i = this.h.length;
-    const x = i * SEG;
+  /** Queue the next section's knots, weighted for the difficulty where it starts. */
+  _plan() {
+    const x = this.h.length * SEG;
     const d = Math.min(1, difficultyAt(x) + this.hills);
-    const gentle = Math.abs(this.h[i - 1] - this.h[i - 2]) < 50; // jump knots skip the slope guard
-    if (x > RUN.gapFromX && this.gapCooldown <= 0 && gentle && this.rng() < 0.06 + 0.12 * d) {
-      this._addJump();
-      return;
+    const r = (lo, hi) => lo + this.rng() * (hi - lo);
+    let name;
+    if (HARD.has(this.last) && this.rng() > d) name = 'breather'; // a breath after a hard bit, less often later
+    else {
+      const opts = Object.entries(SECTIONS).filter(([k]) => !(HARD.has(k) && k === this.last));
+      let roll = this.rng() * opts.reduce((t, [, sec]) => t + Math.max(0, sec.w(d, x)), 0);
+      name = opts.find(([, sec]) => (roll -= Math.max(0, sec.w(d, x))) <= 0)?.[0] ?? 'breather';
     }
-    this.gapCooldown--;
+    this.last = name;
+    const base = this.h[this.h.length - 1];
+    const knots = SECTIONS[name].knots(d, r);
+    // Drift back toward height 0 across the section so the rail never wanders off forever.
+    knots.forEach((k, n) => this.queue.push(k === 'J' ? k : base + k - base * 0.3 * ((n + 1) / knots.length)));
+  }
+
+  _addKnot() {
+    if (!this.queue.length) this._plan();
+    const target = this.queue.shift();
+    if (target === 'J') { this._addJump(); return; }
+    const i = this.h.length;
     const prev = this.h[i - 1];
-    const maxStep = MAX_SLOPE * SEG * (0.3 + 0.45 * d);
-    let delta = clamp((this.rng() * 2 - 1) * maxStep - prev * 0.1, -maxStep, maxStep);
+    const maxStep = MAX_SLOPE * SEG * 0.95;
+    let delta = clamp(target - prev, -maxStep, maxStep);
     // Catmull-Rom can overshoot the chord slope: shrink the step until the finished segment
     // behind this knot stays under the slope limit (that is what keeps every hill climbable).
     for (let k = 0; k < 10; k++) {
@@ -148,7 +188,6 @@ export class Track {
       const [cx, cy] = path[Math.floor((path.length * k) / 7)];
       this.items.push({ kind: 'coin', x: cx, y: cy + 30, taken: false });
     }
-    this.gapCooldown = 8;
   }
 
   _placeItems() {
@@ -160,7 +199,10 @@ export class Track {
       if (this.rng() < RUN.coinRowChance) {
         for (let k = 0; k < 5; k++) {
           const x = x0 + 40 + k * 38;
-          if (!this.isGap(x)) this.items.push({ kind: 'coin', x, y: this.at(x).y + 48, taken: false });
+          const p = this.at(x);
+          // Over a crest the row floats higher: only a train that gets air collects it.
+          const lift = p.ddy < -0.0012 ? 70 : 0;
+          if (!this.isGap(x)) this.items.push({ kind: 'coin', x, y: p.y + 48 + lift, taken: false });
         }
       }
       if (x0 >= this.nextFuelX) {

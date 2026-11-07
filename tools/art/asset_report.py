@@ -24,7 +24,6 @@ TARGETS = [
     ("riders/", 512, 512, "seated rider"),
     ("avatars/", 512, 512, "portrait / frame"),
     ("trails/", 1024, 256, "boost trail"),
-    ("fx/", 1024, 128, "8-frame effect strip"),
     ("ui/logo", 2048, 1024, "logo"),
     ("ui/ribbon", 1536, 384, "results ribbon"),
     ("ui/plinth", 1024, 512, "display platform"),

@@ -8,12 +8,19 @@ import { cosmeticById } from '../../content/cosmetics.js';
 import { CARTS } from '../../content/carts.js';
 import { Particles, Sky, SKY_KIND, drawWheel, drawFlame, emitTrail, emitSparks } from './fx.js';
 import { iconImage } from '../../ui/icons.js';
+import { PHYS } from '../../content/tuning.js';
 
 const CAR_LEN = 128; // world px per car
-const CAR_GAP = 10;
-const TRAIN = 3; // cars per train
+const CAR_GAP = PHYS.carSpacing - CAR_LEN;
+const TRAIN = PHYS.trainCars;
 const RIDERS = ['karen9000', 'cryptobro', 'influencer', 'grandma', 'goose'];
 const STEEL_TOP = 11; // the running surface (steel top rail) sits this far above the rail centre
+const SPINE = -11; // centre of the big tube under the running rail
+const RAIL = STEEL_TOP - 3; // centre of the running rail tube
+// How each rider's art is cut and seated: the cast art includes its own seat on the left and
+// a lap bar below, so it is trimmed to head and torso; Dave's art is already a bust.
+const DAVE_CUT = { left: 0, keep: 0.9, size: 0.3, anchor: 0.5 };
+const CAST_CUT = { left: 0.2, keep: 0.7, size: 0.34, anchor: 0.47 };
 
 export class Renderer {
   constructor(canvas, images) {
@@ -49,16 +56,14 @@ export class Renderer {
     this.canvas.width = Math.round(this.w * dpr);
     this.canvas.height = Math.round(this.h * dpr);
     this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    this.ctx.imageSmoothingQuality = 'high'; // resizing the canvas resets it; painted layers are upscaled
   }
 
   /** Load (once) and prepare a world's backdrop layers. */
   async prepareWorld(world) {
     if (this.worldCache.has(world.id)) return this.worldCache.get(world.id);
-    const files = { ...world.layers };
-    for (const f of world.fx || []) files[`fx_${f}`] = `fx/${f}.webp`;
-    const raw = await loadImages(Object.fromEntries(Object.entries(files).map(([k, v]) => [k, `/assets/${v}`])));
-    const layers = { ...raw, soil: raw.ground ? soilTexture(raw.ground) : null, fx: {} };
-    for (const f of world.fx || []) if (raw[`fx_${f}`]) layers.fx[f] = raw[`fx_${f}`];
+    const raw = await loadImages(Object.fromEntries(Object.entries(world.layers).map(([k, v]) => [k, `/assets/${v}`])));
+    const layers = { ...raw, soil: raw.ground ? soilTexture(raw.ground) : null };
     this.worldCache.set(world.id, layers);
     return layers;
   }
@@ -72,11 +77,10 @@ export class Renderer {
     this.shake = 0;
     this.world = game.world;
     this.layers = this.worldCache.get(game.world.id) || {};
-    this.sky.setSprites(this.layers.fx || {});
+    this.sky.weather.length = 0;
     this.prepareWorld(game.world).then((l) => {
       if (this.world !== game.world) return;
       this.layers = l;
-      this.sky.setSprites(l.fx);
     });
     const seed = game.track.seed;
     this.riders = [RIDERS[0], RIDERS[1 + (seed % 4)]];
@@ -226,42 +230,63 @@ export class Renderer {
     ctx.lineWidth = 7 * z; ctx.strokeStyle = W.grass[1]; ctx.stroke();
   }
 
+  /** Screen point o world px above the rail centre at x, measured along the rail's normal. */
+  railPoint(track, x, o) {
+    const p = track.at(x), L = Math.hypot(1, p.dy), k = o * this.zoom;
+    return [this.sx(x) - (p.dy / L) * k, this.sy(p.y) - k / L];
+  }
+
   drawSupports(track, x0, x1, W) {
     const { ctx } = this;
     const z = this.zoom;
-    const step = 96;
+    const step = 120;
     let prev = null;
+    ctx.lineCap = 'round';
     for (let x = Math.floor(x0 / step) * step; x <= x1 + step; x += step) {
       if (track.isGap(x)) { prev = null; continue; }
-      const top = this.sy(track.at(x).y) + 6 * z;
-      const bot = this.sy(track.groundAt(x));
+      const top = this.sy(track.at(x).y) - (SPINE - 6) * z;
+      const bot = this.sy(track.groundAt(x)) + 6 * z;
       const X = this.sx(x);
-      if (bot - top < 4) { prev = null; continue; }
-      if (prev) {
-        ctx.strokeStyle = '#2a1608'; ctx.lineWidth = 6 * z; ctx.lineCap = 'round';
+      if (bot - top < 10 * z) { prev = null; continue; }
+      if (prev && bot - top > 50 * z && prev.bot - prev.top > 50 * z) {
+        // Cross bracing between neighbouring columns, plus a tie beam halfway down.
+        const mid = (top + bot) / 2, pmid = (prev.top + prev.bot) / 2;
         ctx.beginPath();
-        ctx.moveTo(prev.X, prev.top + 10 * z); ctx.lineTo(X, bot - 4 * z);
-        ctx.moveTo(prev.X, prev.bot - 4 * z); ctx.lineTo(X, top + 10 * z);
-        ctx.stroke();
-        ctx.strokeStyle = W.wood[1]; ctx.lineWidth = 3 * z; ctx.stroke();
+        ctx.moveTo(prev.X, prev.top + 14 * z); ctx.lineTo(X, mid);
+        ctx.moveTo(prev.X, pmid); ctx.lineTo(X, top + 14 * z);
+        ctx.moveTo(prev.X, pmid); ctx.lineTo(X, mid);
+        ctx.strokeStyle = '#1a1020'; ctx.lineWidth = 5 * z; ctx.stroke();
+        ctx.strokeStyle = W.wood[1]; ctx.lineWidth = 2.5 * z; ctx.stroke();
       }
-      ctx.fillStyle = '#2a1608';
+      // Column: dark outline, body, a highlight stripe, a cap plate and a concrete footing.
+      ctx.fillStyle = '#1a1020';
       ctx.fillRect(X - 6 * z, top, 12 * z, bot - top);
       ctx.fillStyle = W.wood[0];
       ctx.fillRect(X - 4 * z, top, 8 * z, bot - top);
-      ctx.fillStyle = 'rgba(255,255,255,0.18)';
-      ctx.fillRect(X - 3 * z, top, 2 * z, bot - top);
+      ctx.fillStyle = 'rgba(255,255,255,0.28)';
+      ctx.fillRect(X - 2.5 * z, top, 2 * z, bot - top);
+      ctx.fillStyle = 'rgba(0,0,0,0.25)';
+      ctx.fillRect(X + 1.5 * z, top, 2.5 * z, bot - top);
+      ctx.fillStyle = '#1a1020';
+      ctx.fillRect(X - 9 * z, top - 2 * z, 18 * z, 5 * z);
+      ctx.fillRect(X - 12 * z, bot - 7 * z, 24 * z, 9 * z);
+      ctx.fillStyle = '#9aa1ae';
+      ctx.fillRect(X - 10.5 * z, bot - 5.5 * z, 21 * z, 6 * z);
+      ctx.fillStyle = '#c9ced8';
+      ctx.fillRect(X - 10.5 * z, bot - 5.5 * z, 21 * z, 2 * z);
       prev = { X, top, bot };
     }
   }
 
+  /** Rail polylines with each point's screen-space up normal, split at gaps. */
   railPaths(track, x0, x1) {
     const paths = [];
     let cur = null;
-    for (let x = x0; x <= x1 + 10; x += 10) {
+    for (let x = x0; x <= x1 + 8; x += 8) {
       if (track.isGap(x)) { cur = null; continue; }
       if (!cur) { cur = []; paths.push(cur); }
-      cur.push([this.sx(x), this.sy(track.at(x).y)]);
+      const p = track.at(x), L = Math.hypot(1, p.dy);
+      cur.push([this.sx(x), this.sy(p.y), -p.dy / L, -1 / L]);
     }
     return paths;
   }
@@ -270,62 +295,87 @@ export class Renderer {
     const { ctx } = this;
     const z = this.zoom;
     const paths = this.railPaths(track, x0, x1);
-    const stroke = (dy, width, color) => {
-      ctx.lineWidth = width; ctx.strokeStyle = color; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
-      for (const p of paths) {
-        ctx.beginPath();
-        p.forEach(([X, Y], i) => (i ? ctx.lineTo(X, Y + dy) : ctx.moveTo(X, Y + dy)));
-        ctx.stroke();
-      }
+    ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    const stroke = (o, width, color) => {
+      ctx.lineWidth = width * z; ctx.strokeStyle = color;
+      const k = o * z;
+      ctx.beginPath();
+      for (const p of paths) p.forEach(([X, Y, nx, ny], i) => (i ? ctx.lineTo(X + nx * k, Y + ny * k) : ctx.moveTo(X + nx * k, Y + ny * k)));
+      ctx.stroke();
     };
-    stroke(4 * z, 22 * z, 'rgba(0,0,0,0.25)');
-    stroke(0, 18 * z, '#1a0a08');
-    stroke(0, 13 * z, W.rail[0]);
-    stroke(-2 * z, 5 * z, W.rail[1]);
-    stroke(-STEEL_TOP * z, 7 * z, '#1a0a08');
-    stroke(-STEEL_TOP * z, 4 * z, '#c9ced8');
-    stroke(-(STEEL_TOP + 1) * z, 1.5 * z, '#ffffff');
+    stroke(SPINE - 8, 18, 'rgba(0,0,0,0.22)'); // soft shadow under the track
 
-    const step = 34;
-    for (let x = Math.floor(x0 / step) * step; x <= x1; x += step) {
+    // Cross-ties tie the running rail to the spine: the ladder that says "coaster track".
+    ctx.beginPath();
+    for (let x = Math.ceil(x0 / 22) * 22; x <= x1; x += 22) {
       if (track.isGap(x)) continue;
-      const X = this.sx(x), Y = this.sy(track.at(x).y) + 1 * z;
+      const [ax, ay] = this.railPoint(track, x, SPINE), [bx, by] = this.railPoint(track, x, RAIL);
+      ctx.moveTo(ax, ay); ctx.lineTo(bx, by);
+    }
+    ctx.lineCap = 'butt';
+    ctx.strokeStyle = '#1a0a08'; ctx.lineWidth = 5 * z; ctx.stroke();
+    ctx.strokeStyle = '#c9ced8'; ctx.lineWidth = 2.5 * z; ctx.stroke();
+    ctx.lineCap = 'round';
+
+    stroke(SPINE, 15, '#1a0a08');
+    stroke(SPINE, 11, W.rail[0]);
+    stroke(SPINE + 2.5, 3.5, W.rail[1]);
+    stroke(RAIL, 9, '#1a0a08');
+    stroke(RAIL, 5.5, '#b9bfcb');
+    stroke(RAIL + 1.5, 2, '#ffffff');
+
+    // Light bulbs along the spine.
+    const step = 48;
+    for (let x = Math.ceil(x0 / step) * step; x <= x1; x += step) {
+      if (track.isGap(x)) continue;
+      const [X, Y] = this.railPoint(track, x, SPINE - 1);
       if (!this.low) {
-        const on = 0.75 + 0.25 * Math.sin(time * 6 - x / 60);
-        const s = 26 * z * on;
-        ctx.globalAlpha = 0.8;
+        const s = 22 * z * (0.75 + 0.25 * Math.sin(time * 6 - x / 60));
+        ctx.globalAlpha = 0.7;
         ctx.drawImage(this.glow, X - s / 2, Y - s / 2, s, s);
         ctx.globalAlpha = 1;
       }
       ctx.fillStyle = W.bulb;
-      ctx.beginPath(); ctx.arc(X, Y, 2.8 * z, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(X, Y, 2.4 * z, 0, Math.PI * 2); ctx.fill();
     }
 
+    // Booster pads: glowing chevrons running along the spine.
     for (const b of track.boosters) {
       if (b.x1 < x0 || b.x0 > x1) continue;
-      for (let x = b.x0; x < b.x1; x += 30) {
+      for (let x = b.x0; x < b.x1; x += 24) {
         const p = track.at(x);
-        const X = this.sx(x), Y = this.sy(p.y) - 30 * z;
-        const pulse = (Math.sin(time * 10 - x / 20) + 1) / 2;
+        const [X, Y] = this.railPoint(track, x, SPINE);
+        const pulse = (Math.sin(time * 12 - x / 18) + 1) / 2;
         ctx.save();
         ctx.translate(X, Y);
         ctx.rotate(-Math.atan(p.dy));
-        ctx.fillStyle = `rgba(255,${180 + pulse * 60},40,${0.6 + pulse * 0.4})`;
-        ctx.strokeStyle = '#1a1a2e'; ctx.lineWidth = 2 * z;
-        ctx.beginPath(); ctx.moveTo(-8 * z, -9 * z); ctx.lineTo(6 * z, 0); ctx.lineTo(-8 * z, 9 * z); ctx.lineTo(-3 * z, 0); ctx.closePath();
+        ctx.globalAlpha = 0.5 + pulse * 0.5;
+        ctx.drawImage(this.glow, -16 * z, -16 * z, 32 * z, 32 * z);
+        ctx.globalAlpha = 1;
+        ctx.fillStyle = `rgb(255,${Math.round(170 + pulse * 80)},40)`;
+        ctx.strokeStyle = '#1a0a08'; ctx.lineWidth = 1.5 * z;
+        ctx.beginPath(); ctx.moveTo(-6 * z, -6 * z); ctx.lineTo(4 * z, 0); ctx.lineTo(-6 * z, 6 * z); ctx.lineTo(-2 * z, 0); ctx.closePath();
         ctx.fill(); ctx.stroke();
         ctx.restore();
       }
     }
 
+    // Rail ends at a jump: hazard-striped buffer plates.
     for (const g of track.gaps) {
       for (const x of [g.x0, g.x1]) {
         if (x < x0 || x > x1) continue;
-        const X = this.sx(x), Y = this.sy(track.at(x).y);
-        ctx.fillStyle = '#1a0a08';
-        ctx.beginPath(); ctx.arc(X, Y, 10 * z, 0, Math.PI * 2); ctx.fill();
-        ctx.fillStyle = '#ffd23f';
-        ctx.beginPath(); ctx.arc(X, Y, 5 * z, 0, Math.PI * 2); ctx.fill();
+        const p = track.at(x);
+        const [X, Y] = this.railPoint(track, x, (SPINE + RAIL) / 2);
+        const h = (RAIL - SPINE + 14) * z;
+        ctx.save();
+        ctx.translate(X, Y);
+        ctx.rotate(-Math.atan(p.dy));
+        ctx.fillStyle = '#1a0a08'; ctx.fillRect(-4 * z, -h / 2, 8 * z, h);
+        for (let k = 0; k < 4; k++) {
+          ctx.fillStyle = k % 2 ? '#1a1a2e' : '#ffd23f';
+          ctx.fillRect(-2.5 * z, -h / 2 + 1.5 * z + (k * (h - 3 * z)) / 4, 5 * z, (h - 3 * z) / 4);
+        }
+        ctx.restore();
       }
     }
   }
@@ -429,6 +479,7 @@ export class Renderer {
     const eq = game.save.cosmetics.equipped;
     const body = this.body(game.cartId, eq.paint);
     const poses = this.carPoses(game);
+    const seat = CARTS.find((ct) => ct.id === game.cartId)?.seat ?? [0.5, 0.3];
     const speed = c.air ? Math.hypot(c.vx, c.vy) : Math.abs(c.v);
     const bounce = c.air ? 0 : Math.sin(game.time * 18) * Math.min(speed / 900, 1) * 1.5 * this.zoom;
 
@@ -447,7 +498,7 @@ export class Renderer {
     for (let k = poses.length - 1; k >= 0; k--) {
       const p = poses[k];
       const rider = k === 0 ? img[`dave_${this.daveFace(game)}`] : img[`rider_${this.riders[(k - 1) % this.riders.length]}`];
-      this.drawCar(p, body, eq.wheel, rider, k === 0, k < poses.length - 1, bounce, c.wheel);
+      this.drawCar(p, body, eq.wheel, rider, k === 0, k < poses.length - 1, bounce, c.wheel, seat);
     }
   }
 
@@ -466,7 +517,7 @@ export class Renderer {
     }
   }
 
-  drawCar(p, body, wheelSkin, rider, lead, coupler, bounce, spin) {
+  drawCar(p, body, wheelSkin, rider, lead, coupler, bounce, spin, seat) {
     const { ctx } = this;
     const z = this.zoom;
     const bw = CAR_LEN * z;
@@ -481,17 +532,19 @@ export class Renderer {
     ctx.translate(this.sx(p.x), this.sy(p.y));
     ctx.rotate(-p.angle);
 
-    // Rider sits in the seat: drawn behind the body, top half showing above it.
+    // Rider sits in the cart's seat gap, drawn behind the body so the side panel hides the cut
+    // line: waist on the rim, head and shoulders above it.
     if (rider) {
-      // Lead car: Dave's head-and-shoulders art sits in the front seat; trailing cars carry the
-      // seated cast, whose art includes the seat, so it sits a little lower.
-      const rw = bw * (lead ? 0.36 : 0.44), rh = (rw * rider.height) / rider.width;
-      const rx = lead ? -bw * 0.08 : -bw * 0.2;
-      ctx.drawImage(rider, rx, bodyBottom - bh * (lead ? 0.5 : 0.42) - rh * (lead ? 0.92 : 1) + bounce, rw, rh);
+      const cut = lead ? DAVE_CUT : CAST_CUT;
+      const [seatX, rim] = seat;
+      const sx = rider.width * cut.left, sw = rider.width - sx, sh = rider.height * cut.keep;
+      const vh = bw * cut.size, vw = (sw * vh) / sh;
+      const rimY = bodyBottom - bh + rim * bh;
+      ctx.drawImage(rider, sx, 0, sw, sh, -bw / 2 + seatX * bw - cut.anchor * vw, rimY + 0.04 * vh - vh + bounce, vw, vh);
     }
 
     // Bogie brackets hook round the rail to the upstop wheels: the coaster tell.
-    const upY = 9 * z + rr; // upstop wheel centre, under the rail
+    const upY = (7.5 - SPINE) * z + rr; // upstop wheel centre, under the spine
     for (const wx of [-bw * 0.3, bw * 0.3]) {
       const len = upY - (bodyBottom - 2 * z);
       ctx.fillStyle = '#1a1a2e';

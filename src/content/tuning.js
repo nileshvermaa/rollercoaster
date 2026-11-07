@@ -26,6 +26,9 @@ export const PHYS = {
   airAlign: 1.6,
   /** Below the rail by this much = fell through a gap. */
   fallDepth: 650,
+  /** The train: gravity acts on every car, so crests pull and drops push gradually. */
+  trainCars: 3,
+  carSpacing: 138, // world px from one car's centre to the next
 };
 
 export const RUN = {
@@ -37,7 +40,14 @@ export const RUN = {
   gapFromX: 2600, // no jump gaps before this
 };
 
-/** Difficulty 0..1 over distance: hills get taller and gaps more frequent. */
+/** Zones: every 300 m the track steps up a difficulty tier and gets a name on the HUD. */
+export const ZONE_PX = 300 * RUN.pxPerMeter;
+export const ZONES = ['Onboarding', 'Synergy Hills', 'Q3 Crunch', 'Layoff Ledge', 'Hostile Takeover', 'Endless Overtime'];
+
+export const zoneAt = (x) => Math.max(0, Math.floor(x / ZONE_PX));
+export const zoneName = (z) => ZONES[Math.min(z, ZONES.length - 1)];
+
+/** Difficulty 0..1 over distance: a step per zone plus a ramp inside it, maxed by zone 5. */
 export function difficultyAt(x) {
-  return Math.min(1, x / 60000);
+  return Math.min(1, (zoneAt(x) + 0.5 * ((x % ZONE_PX) / ZONE_PX)) / 5);
 }

@@ -3,6 +3,7 @@
 import { $, fmt } from '../dom.js';
 import { distanceMeters } from './run.js';
 import { clamp } from '../../engine/math.js';
+import { zoneName } from '../../content/tuning.js';
 
 const last = {};
 function set(id, text) {
@@ -16,7 +17,8 @@ export function updateHud(game) {
   const m = distanceMeters(game);
   const target = Math.max(save.worlds[game.world.id] || 0, 100);
   set('hud-dist', `${fmt(m)} m`);
-  set('hud-best', `${fmt(target)} m`);
+  set('hud-best', m > target && save.worlds[game.world.id] ? 'New best!' : `Best ${fmt(target)} m`);
+  set('hud-zone', `Zone ${run.zone + 1} · ${zoneName(run.zone)}`);
   $('dist-fill').style.width = `${clamp((m / target) * 100, 0, 100)}%`;
   $('dist-crown').style.left = m > target ? '100%' : `${(target / Math.max(target, m)) * 100}%`;
   set('hud-coins', fmt(run.coins));

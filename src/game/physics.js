@@ -52,7 +52,14 @@ export function stepCart(c, track, stats, input, dt) {
       const kappa = p.ddy * cos * cos * cos;
       const throttle = c.fuel > 0 ? input.throttle : 0;
 
-      let a = -g * sin + throttle * stats.engine - PHYS.drag * c.v * Math.abs(c.v);
+      // Gravity pulls on every car of the train, so the cars still climbing hold the lead back
+      // over a crest and the ones already falling drag it down a drop: the coaster feel.
+      let pull = sin;
+      for (let k = 1; k < PHYS.trainCars; k++) {
+        const q = track.at(c.x - k * PHYS.carSpacing).dy;
+        pull += q / Math.sqrt(1 + q * q);
+      }
+      let a = (-g * pull) / PHYS.trainCars + throttle * stats.engine - PHYS.drag * c.v * Math.abs(c.v);
       if (Math.abs(c.v) > 1) a -= PHYS.rolling * (stats.rollingMul ?? 1) * Math.sign(c.v);
       c.v += a * dt;
       if (input.brake > 0) {

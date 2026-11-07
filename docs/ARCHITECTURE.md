@@ -81,7 +81,12 @@ the run → `Renderer.follow` moves the camera → `updateHud` → `Renderer.dra
 ## Track (`src/world/track.js`)
 
 Knots every `WORLD.segment` px; the rail is a Catmull-Rom spline through them, generated from a
-seed as the cart approaches. Rules that keep it fair, each covered by a test:
+seed as the cart approaches. The knots come in hand-shaped sections (`SECTIONS`: breather, rollers,
+hill, climb, drop, camelback, jump), picked by weights that shift with `difficultyAt(x)`. Difficulty
+steps up every 300 m zone (`ZONES` in `tuning.js`, named on the HUD). The main dial is crest
+sharpness: a knot standing P above its neighbours throws the train above roughly
+sqrt(g * segment² / 2P), so later zones demand braking before the tops. After a hard section a breather
+follows, less often as difficulty rises. Rules that keep it fair, each covered by a test:
 
 - **Climbable**: no slope steeper than `WORLD.maxSlopeDeg`, and every cart's engine beats gravity on
   that slope. New knots shrink until both neighbouring segments respect the limit.
@@ -102,7 +107,7 @@ Painted images are only for things code can't paint well: backgrounds, carts, ch
 **Add a cart**: add an entry to `CARTS` in `src/content/carts.js` and an image at
 `public/assets/carts/<id>.webp`. Keep `engine` above the slope test's minimum.
 
-**Add a track feature** (e.g. loops, moving platforms): generate it in `Track._addKnot` (or a sibling
+**Add a track feature** (e.g. loops, moving platforms): add it to `SECTIONS` in `track.js` (or a sibling
 like `_addJump`), store it in its own sorted list, teach `stepCart` the rule, draw it in
 `Renderer.drawRail`, and add a test that a sensible driver can get through it.
 

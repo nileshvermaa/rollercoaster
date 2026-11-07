@@ -62,6 +62,8 @@ export class Game {
     const x = Math.round((innerWidth - stageW) / 2);
     const y = Math.round((innerHeight - stageH) / 2);
     document.documentElement.style.setProperty('--s', s.toFixed(4));
+    // The play HUD hugs the screen edges at full resolution, so it scales on its own, within limits.
+    document.documentElement.style.setProperty('--hs', Math.min(1.7, Math.max(0.8, s)).toFixed(3));
     document.documentElement.style.setProperty('--stage-x', `${x}px`);
     document.documentElement.style.setProperty('--stage-y', `${y}px`);
   }
