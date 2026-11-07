@@ -88,3 +88,8 @@ One-time setup:
    - `VERCEL_PROJECT_ID`: `projectId` from `.vercel/project.json` (or Project Settings)
 
 Until those exist the deploy job skips itself and CI stays green.
+
+## License
+
+[MIT](LICENSE): free to use, change and share, including commercially, as long as the copyright notice stays.
+Contributions are accepted under the same license.
